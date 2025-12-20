@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Coefficient of Variation</title>
+
+<style>
+:root{
+  --bg:#f4f7fb;--card:#fff;--primary:#2563eb;
+  --accent:#10b981;--text:#1f2937;--muted:#6b7280
+}
+body{font-family:system-ui;background:linear-gradient(135deg,#f4f7fb,#e8eef7);
+margin:0;padding:30px;color:var(--text)}
+.container{max-width:1100px;margin:auto}
+.card{background:var(--card);border-radius:14px;padding:20px;
+box-shadow:0 10px 30px rgba(0,0,0,.08);margin-bottom:20px}
+textarea{width:100%;height:160px;padding:12px;border-radius:10px;border:1px solid #d1d5db}
+button{padding:10px 16px;border-radius:10px;border:none;cursor:pointer}
+.primary{background:var(--primary);color:white}
+.reset{background:#e5e7eb}
+.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.box{background:#f9fafb;border-radius:12px;padding:16px;border-left:6px solid var(--accent)}
+.toggle{color:var(--primary);cursor:pointer;font-size:14px}
+.explain{display:none;color:var(--muted);font-size:14px;margin-top:8px}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>Coefficient of Variation</h1>
+
+<div class="card">
+<h3>Paste Data (2 or 3 Trials)</h3>
+<textarea id="data"></textarea><br><br>
+<button class="primary" onclick="calc()">Calculate</button>
+<button class="reset" onclick="resetAll()">Reset</button>
+<button onclick="downloadCSV()">Download CSV</button>
+</div>
+
+<div id="out" class="results"></div>
+
+</div>
+
+<script>
+let resultsCSV="Metric,Value\n";
+
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+const sd=a=>{const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(a.length-1))};
+
+function parse(){
+ return document.getElementById("data").value.trim().split(/\n+/)
+ .map(r=>r.trim().split(/[\t, ]+/).map(Number))
+ .filter(r=>r.length>=2);
+}
+
+function calc(){
+ const d=parse(); if(!d.length)return;
+ const k=d[0].length, flat=d.flat(), gm=mean(flat);
+
+ const cv1=sd(flat)/gm*100;
+ const cv2=mean(d.map(r=>sd(r)/mean(r)*100));
+
+ let diffs=[];
+ if(k===2)d.forEach(r=>diffs.push(r[1]-r[0]));
+ else d.forEach(r=>{for(let i=1;i<k;i++)diffs.push(r[i]-r[0])});
+
+ const te=sd(diffs)/Math.sqrt(2);
+ const cv3=te/gm*100;
+
+ let rel, t="", ba="";
+ if(k===2){
+  const x=d.map(r=>r[0]),y=d.map(r=>r[1]);
+  rel=pearson(x,y);
+  const bias=mean(diffs), loa=1.96*sd(diffs);
+  ba=`Bias=${bias.toFixed(2)}, LOA=±${loa.toFixed(2)}`;
+  t=`Paired t=${pairedT(x,y).toFixed(2)}`;
+ }else{
+  rel=icc31(d);
+ }
+
+ const sem=sd(flat)*Math.sqrt(1-rel);
+ const mdc=sem*1.96*Math.sqrt(2);
+ const mdcP=mdc/gm*100;
+
+ resultsCSV+=
+ `CV Method 1,${cv1.toFixed(2)}\nCV Method 2,${cv2.toFixed(2)}\nCV Method 3,${cv3.toFixed(2)}\n`+
+ `Reliability,${rel.toFixed(3)}\nSEM,${sem.toFixed(2)}\nMDC,${mdc.toFixed(2)}\nMDC%,${mdcP.toFixed(2)}\n`;
+
+ document.getElementById("out").innerHTML=`
+ <div class="box"><h3>CV</h3>
+ M1: ${cv1.toFixed(2)}%<br>M2: ${cv2.toFixed(2)}%<br>M3: ${cv3.toFixed(2)}%
+ <div class="toggle" onclick="tog(this)">Explain</div>
+ <div class="explain">Three complementary CV calculations commonly reported in reliability studies.</div>
+ </div>
+
+ <div class="box"><h3>Reliability</h3>
+ ${k===2?`r=${rel.toFixed(3)}<br>${t}<br>${ba}`:`ICC(3,1)=${rel.toFixed(3)}`}
+ </div>
+
+ <div class="box"><h3>MDC</h3>
+ SEM=${sem.toFixed(2)}<br>MDC=${mdc.toFixed(2)}<br>MDC%=${mdcP.toFixed(2)}
+ </div>`;
+}
+
+function pearson(x,y){
+ const mx=mean(x),my=mean(y);
+ return x.reduce((s,v,i)=>s+(v-mx)*(y[i]-my),0)/
+ Math.sqrt(x.reduce((s,v)=>s+(v-mx)**2,0)*y.reduce((s,v)=>s+(v-my)**2,0));
+}
+
+function pairedT(x,y){
+ const d=y.map((v,i)=>v-x[i]);
+ return mean(d)/(sd(d)/Math.sqrt(d.length));
+}
+
+function icc31(d){
+ const n=d.length,k=d[0].length,gm=mean(d.flat());
+ const rm=d.map(r=>mean(r));
+ const msb=k*rm.reduce((s,v)=>s+(v-gm)**2,0)/(n-1);
+ const msw=d.reduce((s,r,i)=>s+r.reduce((ss,v)=>ss+(v-rm[i])**2,0),0)/(n*(k-1));
+ return (msb-msw)/(msb+(k-1)*msw);
+}
+
+function tog(el){
+ el.nextElementSibling.style.display=
+ el.nextElementSibling.style.display==="block"?"none":"block";
+}
+
+function downloadCSV(){
+ const blob=new Blob([resultsCSV],{type:"text/csv"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);
+ a.download="CV_results.csv";
+ a.click();
+}
+
+function resetAll(){
+ document.getElementById("data").value="";
+ document.getElementById("out").innerHTML="";
+ resultsCSV="Metric,Value\n";
+}
+</script>
+</body>
+</html>

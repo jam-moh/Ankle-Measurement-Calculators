@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Typical Error & Reliability Calculator</title>
+
+<style>
+
+/* ✅ Gradient background — charcoal to deep blue */
+body {
+  background-color: #1a3f3f; /* ✅ lighter teal */
+  color: #e6e6e6;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+/* ✅ Section boxes — graphite panels */
+.section-wrapper {
+  background-color: #2a2a2a;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 6px rgba(0,0,0,0.45);
+}
+
+/* ✅ Table — compact, clean */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background-color: #262626;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th {
+  padding: 0.55rem;
+  color: #e6e6e6; /* ✅ white headings */
+  font-weight: 600;
+  background-color: #303030;
+  border-bottom: 1px solid #444;
+}
+
+td {
+  padding: 0.45rem;
+  border-bottom: 1px solid #3a3a3a;
+  word-wrap: break-word;
+  text-align: center;
+  color: #00e6d6; /* ✅ cyan-green hybrid numbers */
+}
+
+/* ✅ Hover effect */
+tr:hover td {
+  background-color: #333;
+}
+
+/* ✅ Cyan-green result numbers */
+.result-number {
+  color: #00e6d6;
+  font-weight: bold;
+}
+
+/* ✅ Interpretation blocks — matte dark */
+pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background-color: #1b1b1b;
+  padding: 0.9rem;
+  border-radius: 6px;
+  color: #e6e6e6;
+  font-size: 0.95rem;
+}
+
+/* ✅ Headings — white */
+h1, .interpretation b, .results b {
+  color: #e6e6e6;
+}
+
+/* ✅ Textareas — matte dark */
+textarea {
+  width: 100%;
+  max-width: 700px;
+  height: 100px;
+  margin-top: 10px;
+  padding: 5px;
+  background: #111;
+  color: #0ff;
+  border: none;
+  border-radius: 5px;
+  font-family: monospace;
+}
+
+/* ✅ Inputs and dropdowns — dark UI */
+input, select {
+  background-color: #2a2a2a;
+  color: #e6e6e6;
+  border: 1px solid #555;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* ✅ Footer — subtle gray */
+.footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>📊 Typical Error & Reliability Calculator</h1>
+
+<!-- ✅ Controls -->
+<div class="section-wrapper">
+  <div class="controls">
+    Individuals:
+    <input type="number" id="peopleCount" value="5" min="2">
+    &nbsp;&nbsp;
+    Trials:
+    <select id="trialMode">
+      <option value="2">2 Trials</option>
+      <option value="3" selected>3 Trials</option>
+    </select>
+    &nbsp;&nbsp;
+    BA Comparison:
+    <select id="baPair">
+      <option value="2-1">Trial 2 – Trial 1</option>
+      <option value="3-2">Trial 3 – Trial 2</option>
+      <option value="3-1">Trial 3 – Trial 1</option>
+    </select>
+  </div>
+</div>
+
+<!-- ✅ Paste area -->
+<div class="section-wrapper">
+  <textarea id="pasteData" placeholder="Paste your Excel data here (columns for Trial1, Trial2, Trial3)..."></textarea>
+</div>
+
+<!-- ✅ Table -->
+<div class="section-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>Person</th>
+        <th>Trial 1</th>
+        <th>Trial 2</th>
+        <th class="trial3Col">Trial 3</th>
+        <th>Diff 2–1</th>
+        <th class="diff32Col">Diff 3–2</th>
+      </tr>
+    </thead>
+    <tbody id="scoreTable"></tbody>
+  </table>
+</div>
+
+<!-- ✅ Results -->
+<div class="section-wrapper">
+  <div class="results">
+    📉 SD of Differences:
+    <span class="result-number" id="sdValue">0.00</span><br><br>
+
+    🧪 Typical Error (TE = SD ÷ √2):
+    <span class="result-number" id="teValue">0.00</span><br><br>
+
+    🧠 SEM:
+    <span class="result-number" id="semValue">0.00</span><br><br>
+
+    🚨 MDC<sub>95</sub>:
+    <span class="result-number" id="mdcValue">0.00</span><br><br>
+
+    CV (%):
+    <span class="result-number" id="cvValue">0.00</span><br><br>
+
+    🔹 SWC:
+    <span class="result-number" id="swcValue">0.00</span><br><br>
+
+    Mean Bias:
+    <span class="result-number" id="biasValue">0.00</span><br>
+    LoA:
+    <span class="result-number" id="loaValue">–</span><br><br>
+
+    📊 Reliability:
+    <span id="relType">ICC:</span> <span class="result-number" id="relValue">0.00</span>
+  </div>
+</div>
+
+<!-- ✅ Chart -->
+<div class="section-wrapper">
+  <canvas id="blandAltmanChart" height="400"></canvas>
+</div>
+
+<!-- ✅ Interpretation -->
+<div class="section-wrapper">
+  <div class="interpretation">
+    <b>Itemized Interpretation:</b>
+    <pre id="itemizedInterp">–</pre>
+
+    <b>Overall Summary:</b>
+    <pre id="overallSummary">–</pre>
+
+    <b>Short Paragraph (Publication-ready):</b>
+    <pre id="shortParagraph">–</pre>
+  </div>
+</div>
+
+<!-- ✅ Formulas -->
+<div class="section-wrapper">
+  <div class="formulas">
+    <b>Formulas Reference:</b><br>
+    Typical Error (TE) = SD of differences ÷ √2<br>
+    SEM = SD × √(1 − r)<br>
+    MDC<sub>95</sub> = 1.96 × SEM × √2<br>
+    CV (%) = SD of raw scores ÷ Mean of raw scores × 100<br>
+    SWC = 0.2 × SD of baseline scores<br>
+    Mean Bias = mean difference (TrialB − TrialA)<br>
+    Limits of Agreement (LoA) = Mean Bias ± 1.96 × SD_diff<br>
+    ICC (for 3 trials) = variance_between_subjects / (variance_between_subjects + variance_within_subjects)<br>
+    r (for 2 trials) = 1 − (SD_diff² / SD_raw²)
+  </div>
+</div>
+
+<div class="footer">
+  Pure HTML + Vanilla JS · Journal-ready reliability & agreement calculator
+</div>
+
+<script>
+// --- JS Section ---
+const table = document.getElementById('scoreTable');
+const peopleInput = document.getElementById('peopleCount');
+const trialMode = document.getElementById('trialMode');
+const pasteData = document.getElementById('pasteData');
+const baPair = document.getElementById('baPair');
+
+const sdValue  = document.getElementById('sdValue');
+const teValue  = document.getElementById('teValue');
+const semValue = document.getElementById('semValue');
+const mdcValue = document.getElementById('mdcValue');
+const cvValue  = document.getElementById('cvValue');
+const swcValue = document.getElementById('swcValue');
+const biasValue= document.getElementById('biasValue');
+const loaValue = document.getElementById('loaValue');
+const relValue = document.getElementById('relValue');
+const relType  = document.getElementById('relType');
+
+const itemizedInterp = document.getElementById('itemizedInterp');
+const overallSummary = document.getElementById('overallSummary');
+const shortParagraph = document.getElementById('shortParagraph');
+
+const baCanvas = document.getElementById('blandAltmanChart');
+const ctx = baCanvas.getContext('2d');
+
+// --- Utility Functions ---
+function calculateSD(values){
+  if(values.length<2) return 0;
+  const mean = values.reduce((a,b)=>a+b,0)/values.length;
+  const varian = values.reduce((s,x)=>s+(x-mean)**2,0)/(values.length-1);
+  return Math.sqrt(varian);
+}
+
+// Generate table dynamically
+function generateTable(n){
+  table.innerHTML = '';
+  const mode3 = trialMode.value==='3';
+  for(let i=0;i<n;i++){
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>Person ${i+1}</td>
+      <td><input type="number" step="any" class="t1" data-row="${i}"></td>
+      <td><input type="number" step="any" class="t2" data-row="${i}"></td>
+      <td class="trial3Col"><input type="number" step="any" class="t3" data-row="${i}" ${mode3?'':'disabled'}></td>
+      <td id="d21-${i}">–</td>
+      <td class="diff32Col" id="d32-${i}">–</td>`;
+    table.appendChild(row);
+  }
+  updateColumnVisibility();
+  attachListeners();
+  updateResults();
+}
+
+function updateColumnVisibility(){
+  const mode3 = trialMode.value==='3';
+  document.querySelectorAll('.trial3Col').forEach(td=>td.style.display=mode3?'':'none');
+  document.querySelectorAll('.diff32Col').forEach(td=>td.style.display=mode3?'':'none');
+}
+
+// Parse pasted Excel data
+function parsePasteData(){
+  const text = pasteData.value.trim();
+  if(!text) return;
+  const rows = text.split(/\r?\n/);
+  const n = rows.length;
+  peopleInput.value=n;
+  generateTable(n);
+  const mode3 = trialMode.value==='3';
+  rows.forEach((line,i)=>{
+    const cols = line.split(/\t|,/).map(x=>parseFloat(x));
+    if(!isNaN(cols[0])) document.querySelector(`.t1[data-row="${i}"]`).value=cols[0];
+    if(!isNaN(cols[1])) document.querySelector(`.t2[data-row="${i}"]`).value=cols[1];
+    if(mode3 && !isNaN(cols[2])) document.querySelector(`.t3[data-row="${i}"]`).value=cols[2];
+  });
+  updateResults();
+}
+
+// Get all raw scores
+function getAllRawScores(){
+  const raw=[];
+  const n = document.querySelectorAll('.t1').length;
+  const mode3 = trialMode.value==='3';
+  for(let i=0;i<n;i++){
+    const t1=parseFloat(document.querySelector(`.t1[data-row="${i}"]`).value);
+    const t2=parseFloat(document.querySelector(`.t2[data-row="${i}"]`).value);
+    const t3=parseFloat(document.querySelector(`.t3[data-row="${i}"]`).value);
+    if(!isNaN(t1)) raw.push(t1);
+    if(!isNaN(t2)) raw.push(t2);
+    if(mode3 && !isNaN(t3)) raw.push(t3);
+  }
+  return raw;
+}
+
+// Get differences and mean bias for BA plot
+function getDiffsForBA(pair){
+  const n = document.querySelectorAll('.t1').length;
+  const diffs = [], means=[];
+  for(let i=0;i<n;i++){
+    const t1=parseFloat(document.querySelector(`.t1[data-row="${i}"]`).value);
+    const t2=parseFloat(document.querySelector(`.t2[data-row="${i}"]`).value);
+    const t3=parseFloat(document.querySelector(`.t3[data-row="${i}"]`).value);
+    let a,b;
+    if(pair==='2-1'){a=t1;b=t2;}
+    else if(pair==='3-2'){a=t2;b=t3;}
+    else if(pair==='3-1'){a=t1;b=t3;}
+    if(!isNaN(a)&&!isNaN(b)){
+      diffs.push(b-a);
+      means.push((a+b)/2);
+    }
+  }
+  const meanBias = diffs.reduce((a,b)=>a+b,0)/diffs.length;
+  const sdDiff = calculateSD(diffs);
+  return {diffs, means, meanBias, sdDiff};
+}
+
+// Generate Bland-Altman plot
+function generateBlandAltman(){
+  ctx.clearRect(0,0,baCanvas.width,baCanvas.height);
+  const pair = baPair.value;
+  const {diffs, means, meanBias, sdDiff} = getDiffsForBA(pair);
+  if(diffs.length<2) return;
+  const loaUpper = meanBias+1.96*sdDiff;
+  const loaLower = meanBias-1.96*sdDiff;
+
+  const margin=50, w=baCanvas.width-margin*2, h=baCanvas.height-margin*2;
+  const xMin=Math.min(...means), xMax=Math.max(...means);
+  const yMin=Math.min(...diffs.concat([loaLower])), yMax=Math.max(...diffs.concat([loaUpper]));
+
+  function mapX(x){return margin+((x-xMin)/(xMax-xMin))*w;}
+  function mapY(y){return baCanvas.height-margin-((y-yMin)/(yMax-yMin))*h;}
+
+  // Points
+  ctx.fillStyle='#00ffd5';
+  diffs.forEach((d,i)=>{
+    ctx.beginPath();
+    ctx.arc(mapX(means[i]), mapY(d),4,0,2*Math.PI);
+    ctx.fill();
+  });
+
+  // Lines
+  function drawLine(yValue,color,label){
+    ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(margin,mapY(yValue)); ctx.lineTo(baCanvas.width-margin,mapY(yValue)); ctx.stroke();
+    ctx.fillText(label, baCanvas.width-margin-80,mapY(yValue)-5);
+  }
+  ctx.font='14px monospace';
+  drawLine(meanBias,'yellow','Mean Bias: '+meanBias.toFixed(2));
+  drawLine(loaUpper,'red','LoA+: '+loaUpper.toFixed(2));
+  drawLine(loaLower,'red','LoA-: '+loaLower.toFixed(2));
+}
+
+// Main update results function
+function updateResults(){
+  const nSubjects = document.querySelectorAll('.t1').length;
+  const mode3 = trialMode.value==='3';
+  const rawScores = getAllRawScores();
+
+  // Differences
+  let diffs=[];
+  let biasSum=0, biasCount=0;
+  for(let i=0;i<nSubjects;i++){
+    const t1=parseFloat(document.querySelector(`.t1[data-row="${i}"]`).value);
+    const t2=parseFloat(document.querySelector(`.t2[data-row="${i}"]`).value);
+    const t3=parseFloat(document.querySelector(`.t3[data-row="${i}"]`).value);
+    // 2-1
+    if(!isNaN(t1)&&!isNaN(t2)){
+      const d21 = t2-t1;
+      diffs.push(d21);
+      biasSum+=d21; biasCount++;
+      document.getElementById(`d21-${i}`).textContent=d21.toFixed(2);
+    } else document.getElementById(`d21-${i}`).textContent='–';
+    // 3-2
+    if(mode3 && !isNaN(t2)&&!isNaN(t3)){
+      const d32=t3-t2; diffs.push(d32);
+      document.getElementById(`d32-${i}`).textContent=d32.toFixed(2);
+    } else if(mode3) document.getElementById(`d32-${i}`).textContent='–';
+  }
+
+  const sd = calculateSD(diffs);
+  const te = sd/Math.sqrt(2);
+
+  // Reliability
+  let reliability=0;
+  if(mode3){
+    const trialData=[];
+    for(let i=0;i<nSubjects;i++){
+      trialData.push([
+        parseFloat(document.querySelector(`.t1[data-row="${i}"]`).value),
+        parseFloat(document.querySelector(`.t2[data-row="${i}"]`).value),
+        parseFloat(document.querySelector(`.t3[data-row="${i}"]`).value)
+      ]);
+    }
+    // ICC
+    const meansPerSub = trialData.map(trials=>trials.reduce((a,b)=>a+b,0)/trials.length);
+    const grandMean = meansPerSub.reduce((a,b)=>a+b,0)/nSubjects;
+    const varBetween = meansPerSub.reduce((s,m)=>s+(m-grandMean)**2,0)/(nSubjects-1);
+    let varWithin=0;
+    for(let i=0;i<nSubjects;i++){
+      const trials=trialData[i];
+      const m = trials.reduce((a,b)=>a+b,0)/trials.length;
+      varWithin += trials.reduce((s,x)=>s+(x-m)**2,0)/(trials.length-1);
+    }
+    varWithin/=nSubjects;
+    reliability=varBetween/(varBetween+varWithin);
+    relType.textContent='ICC:';
+  } else {
+    const sdRaw = calculateSD(rawScores);
+    reliability = 1 - (sd*sd)/(sdRaw*sdRaw);
+    relType.textContent='r:';
+  }
+
+  const sem = sd*Math.sqrt(1-reliability);
+  const mdc = 1.96*sem*Math.sqrt(2);
+  const meanRaw = rawScores.reduce((a,b)=>a+b,0)/rawScores.length;
+  const sdRaw = calculateSD(rawScores);
+  const cv = meanRaw>0 ? (sdRaw/meanRaw*100) : 0;
+  const swc = 0.2*sdRaw;
+
+  const meanBias = biasSum/biasCount;
+  const loaLower = meanBias-1.96*sd;
+  const loaUpper = meanBias+1.96*sd;
+
+  sdValue.textContent=sd.toFixed(2);
+  teValue.textContent=te.toFixed(2);
+  semValue.textContent=sem.toFixed(2);
+  mdcValue.textContent=mdc.toFixed(2);
+  cvValue.textContent=cv.toFixed(2);
+  swcValue.textContent=swc.toFixed(2);
+  biasValue.textContent=meanBias.toFixed(2);
+  loaValue.textContent=`${loaLower.toFixed(2)} to ${loaUpper.toFixed(2)}`;
+  relValue.textContent=reliability.toFixed(2);
+
+  // Rich interpretations
+  const modeText = mode3 ? 'ICC' : 'r';
+  const reliabilityText = reliability.toFixed(2);
+  const teText = te.toFixed(2);
+  const semText = sem.toFixed(2);
+  const mdcText = mdc.toFixed(2);
+  const swcText = swc.toFixed(2);
+  const cvText = cv.toFixed(2);
+  const biasText = meanBias.toFixed(2);
+  const loaLowerText = loaLower.toFixed(2);
+  const loaUpperText = loaUpper.toFixed(2);
+
+itemizedInterp.innerHTML =
+`1. Typical Error (TE = ${teText}): Represents the expected trial-to-trial variability. A lower TE indicates more consistent measurements.
+2. Standard Error of Measurement (SEM = ${semText}): Reflects the precision of individual scores; smaller SEM indicates more reliable measurement.
+3. Minimal Detectable Change at 95% (MDC95 = ${mdcText}): The smallest change that can be considered beyond measurement error.
+4. Smallest Worthwhile Change (SWC = ${swcText}): The minimal change considered clinically meaningful.
+5. Coefficient of Variation (CV = ${cvText}%): Expresses variability relative to the mean; lower CV suggests better relative consistency.
+6. Mean Bias = ${biasText}, Limits of Agreement = ${loaLowerText} to ${loaUpperText}: Indicates the average difference between trials and the range within which most differences fall.
+7. ${modeText} = ${reliabilityText}: Indicates reliability; values closer to 1 represent excellent repeatability.`.replace(/\n/g, '<br>');
+
+overallSummary.innerHTML =
+`The measurement demonstrated ${reliability>=0.75?'high':'moderate'} reliability (${modeText}=${reliabilityText}). Trial-to-trial variability was ${teText}, with an SEM of ${semText}, and an MDC95 of ${mdcText}, suggesting that changes greater than ${mdcText} units can be considered real. The SWC (${swcText}) provides a benchmark for meaningful change. The mean bias between trials was ${biasText} with limits of agreement from ${loaLowerText} to ${loaUpperText}, indicating ${Math.abs(loaUpper-loaLower)>2*te ? 'considerable':'acceptable'} variability across repeated measurements.`.replace(/\n/g, '<br>');
+
+shortParagraph.innerHTML =
+`Repeated measurements of the outcome demonstrated ${reliability>=0.75?'excellent':'moderate'} reliability (${modeText}=${reliabilityText}). The typical error was ${teText} and the SEM was ${semText}, indicating the expected measurement variability. The MDC95 was ${mdcText}, which represents the minimum change that can be interpreted as real, while the SWC (${swcText}) defines the smallest clinically meaningful change. The mean bias was ${biasText} with limits of agreement ranging from ${loaLowerText} to ${loaUpperText}, reflecting the range in which most trial differences are expected to fall. Overall, these metrics support the ${reliability>=0.75?'precision and repeatability':'adequacy'} of this measurement method for research or clinical use.`.replace(/\n/g, '<br>');
+
+  generateBlandAltman();
+}
+
+// Attach listeners
+function attachListeners(){
+  document.querySelectorAll('input[type="number"]').forEach(input=>{
+    input.addEventListener('input',updateResults);
+  });
+  trialMode.addEventListener('change',()=>generateTable(parseInt(peopleInput.value)));
+  peopleInput.addEventListener('change',()=>generateTable(Math.max(2,parseInt(peopleInput.value))));
+  pasteData.addEventListener('paste',()=>setTimeout(parsePasteData,50));
+  baPair.addEventListener('change',updateResults);
+}
+
+// Initial setup
+generateTable(parseInt(peopleInput.value));
+attachListeners();
+</script>
+
+</body>
+</html>
