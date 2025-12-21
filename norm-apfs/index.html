@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ankle Plantar Flexion Strength – Normative Comparison</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Segoe UI, system-ui, sans-serif;
+  background:linear-gradient(135deg,#e0f2fe,#f8fafc);
+  color:#111;
+}
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:30px;
+}
+h1{text-align:center;color:#2563eb;}
+.subtitle{text-align:center;opacity:0.85;margin-bottom:25px;}
+
+.card{
+  background:white;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:25px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+.controls{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:15px;
+}
+
+label{font-weight:600;}
+input, select{
+  width:100%;
+  padding:8px;
+  font-size:1.05rem;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+.toggle button{
+  padding:10px;
+  margin-right:5px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+}
+.toggle .active{
+  background:#2563eb;
+  color:white;
+}
+
+canvas{
+  width:100%;
+  height:360px;
+}
+
+.summary{
+  margin-top:15px;
+  padding:15px;
+  border-radius:12px;
+  background:#f1f5f9;
+  font-size:1.05rem;
+}
+
+.buttons button{
+  padding:10px 16px;
+  margin-right:10px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+  background:#2563eb;
+  color:white;
+}
+
+@media print{
+  .no-print{display:none;}
+  body{background:white;}
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+}
+th{background:#e5e7eb;}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>Ankle Plantar Flexion Strength</h1>
+<p class="subtitle">Comparison with age-based normative reference values</p>
+
+<div class="card controls no-print">
+  <div>
+    <label>Age (years)</label>
+    <input type="number" id="age" min="0" value="30">
+  </div>
+
+  <div>
+    <label>Strength</label>
+    <input type="number" id="strength" min="0" value="250">
+  </div>
+
+  <div>
+    <label>Unit</label>
+    <select id="unit">
+      <option value="N">Newton (N)</option>
+      <option value="lb">Pound-force (lb)</option>
+      <option value="kgf">Kilogram-force (kgf)</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Sex</label>
+    <div class="toggle">
+      <button class="active" data-sex="male">Male</button>
+      <button data-sex="female">Female</button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <canvas id="plot" width="1000" height="360"></canvas>
+  <div id="summary" class="summary"></div>
+
+  <div class="buttons no-print">
+    <button onclick="resetApp()">Reset</button>
+    <button onclick="window.print()">Export PDF</button>
+  </div>
+</div>
+
+<div class="card">
+<h3>Normative Reference Values (Newton)</h3>
+<table>
+<tr><th>Age Group</th><th>Male Mean (SD)</th><th>Female Mean (SD)</th></tr>
+<tr><td>3–9 years</td><td>257.0 (85.6)</td><td>151.7 (52.3)</td></tr>
+<tr><td>10–19 years</td><td>142.7 (45.9)</td><td>309.9 (74.9)</td></tr>
+<tr><td>20–59 years</td><td>261.2 (52.7)</td><td>338.8 (66.8)</td></tr>
+<tr><td>60+ years</td><td>243.9 (59.2)</td><td>216.3 (60.3)</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Reference</h3>
+<p>
+McKay, M. J., Baldwin, J. N., Ferreira, P., Simic, M., Vanicek, N., Burns, J., et al. (2017).
+<em>Normative reference values for strength and flexibility of 1,000 children and adults.</em>
+Neurology, 88(1), 36–43.
+</p>
+</div>
+
+</div>
+
+<script>
+const norms=[
+ {age:6,m:{m:257,sd:85.6},f:{m:151.7,sd:52.3}},
+ {age:15,m:{m:142.7,sd:45.9},f:{m:309.9,sd:74.9}},
+ {age:40,m:{m:261.2,sd:52.7},f:{m:338.8,sd:66.8}},
+ {age:70,m:{m:243.9,sd:59.2},f:{m:216.3,sd:60.3}}
+];
+
+let sex="m";
+
+const ageEl=document.getElementById("age");
+const strengthEl=document.getElementById("strength");
+const unitEl=document.getElementById("unit");
+const summaryEl=document.getElementById("summary");
+const ctx=document.getElementById("plot").getContext("2d");
+
+function toNewton(v,u){
+ if(u==="lb") return v*4.44822;
+ if(u==="kgf") return v*9.80665;
+ return v;
+}
+
+function interpolate(age){
+ let a=norms[0],b=norms[norms.length-1];
+ for(let i=0;i<norms.length-1;i++){
+  if(age>=norms[i].age && age<=norms[i+1].age){
+   a=norms[i]; b=norms[i+1]; break;
+  }
+ }
+ const t=(age-a.age)/(b.age-a.age);
+ return{
+  mean:a[sex].m+t*(b[sex].m-a[sex].m),
+  sd:a[sex].sd+t*(b[sex].sd-a[sex].sd)
+ };
+}
+
+function draw(){
+ ctx.clearRect(0,0,1000,360);
+ const age=+ageEl.value;
+ const valN=toNewton(+strengthEl.value,unitEl.value);
+ const n=interpolate(age);
+
+ const min=Math.min(0,valN,n.mean-3*n.sd);
+ const max=Math.max(valN,n.mean+3*n.sd);
+ const x=v=>(v-min)/(max-min)*1000;
+
+ ctx.fillStyle="#fee2e2";
+ ctx.fillRect(x(min),0,x(n.mean-n.sd),360);
+ ctx.fillStyle="#fef3c7";
+ ctx.fillRect(x(n.mean-n.sd),0,x(n.mean+n.sd)-x(n.mean-n.sd),360);
+ ctx.fillStyle="#dcfce7";
+ ctx.fillRect(x(n.mean+n.sd),0,x(max)-x(n.mean+n.sd),360);
+
+ ctx.strokeStyle="#000";
+ ctx.beginPath();
+ ctx.moveTo(x(n.mean),0);
+ ctx.lineTo(x(n.mean),360);
+ ctx.stroke();
+
+ ctx.strokeStyle="#2563eb";
+ ctx.lineWidth=3;
+ ctx.beginPath();
+ ctx.arc(x(valN),180,12,0,Math.PI*2);
+ ctx.stroke();
+
+ ctx.fillStyle="#2563eb";
+ ctx.font="bold 14px Segoe UI";
+ ctx.fillText(valN.toFixed(1)+" N",x(valN)+14,165);
+
+ generateSummary(valN,n);
+}
+
+function generateSummary(value,n){
+ const diff=((value-n.mean)/n.mean)*100;
+ let text;
+
+ if(value < n.mean-n.sd){
+  text="This individual’s ankle plantar flexion strength is below what is typically expected for others of the same age and sex.";
+ }else if(value > n.mean+n.sd){
+  text="This individual’s ankle plantar flexion strength is above what is typically expected for others of the same age and sex.";
+ }else{
+  text="This individual’s ankle plantar flexion strength is within the expected range for others of the same age and sex.";
+ }
+
+ summaryEl.innerHTML=
+  text+
+  ` Their measured strength is approximately <strong>${Math.abs(diff).toFixed(0)}%</strong> `+
+  (diff<0?"lower":"higher")+" than the average reported in large normative studies.";
+}
+
+function resetApp(){
+ ageEl.value=0;
+ strengthEl.value=0;
+ summaryEl.textContent="";
+ draw();
+}
+
+document.querySelectorAll(".toggle button").forEach(b=>{
+ b.onclick=()=>{
+  document.querySelectorAll(".toggle button").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  sex=b.dataset.sex==="male"?"m":"f";
+  draw();
+ };
+});
+
+[ageEl,strengthEl,unitEl].forEach(el=>el.oninput=draw);
+draw();
+</script>
+</body>
+</html>
