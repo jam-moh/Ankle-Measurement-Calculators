@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Torque ⇄ Force Calculator</title>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .container {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 540px;
+      width: 100%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+
+    .input-group {
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    label {
+      min-width: 140px;
+    }
+
+    input, select {
+      padding: 6px 10px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: none;
+      width: 120px;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 8px 18px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button.submit {
+      background-color: #00ffd5;
+      color: #003333;
+    }
+
+    button.reset {
+      background-color: #ff6b6b;
+      color: #330000;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    .results {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.2rem;
+    }
+
+    .result-number {
+      font-weight: bold;
+      color: #00ffd5;
+    }
+
+    .footer {
+      margin-top: auto;
+      font-size: 0.8rem;
+      color: #aaa;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🦵 Torque ⇄ Force Calculator</h1>
+
+<div class="container">
+
+  <!-- MODE -->
+  <div class="input-group">
+    <label>Calculation Mode:</label>
+    <select id="mode">
+      <option value="forceToTorque">Force → Torque</option>
+      <option value="torqueToForce">Torque → Force</option>
+    </select>
+  </div>
+
+  <!-- BODY WEIGHT -->
+  <div class="input-group">
+    <label>Body Weight:</label>
+    <input type="number" id="bwValue" step="any" min="0">
+    <select id="bwUnit">
+      <option value="kg">kg</option>
+      <option value="lb">lb</option>
+    </select>
+  </div>
+
+  <!-- MAIN INPUT -->
+  <div class="input-group">
+    <label id="mainLabel">Force:</label>
+    <input type="number" id="mainValue" step="any" min="0">
+    <select id="mainUnit"></select>
+  </div>
+
+  <!-- LENGTH -->
+  <div class="input-group">
+    <label>Moment Arm Length:</label>
+    <input type="number" id="lengthValue" step="any" min="0">
+    <select id="lengthUnit">
+      <option value="m">m</option>
+      <option value="cm">cm</option>
+      <option value="in">in</option>
+    </select>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="button-group">
+    <button class="submit" id="submitBtn">Submit</button>
+    <button class="reset" id="resetBtn">Reset</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results">
+    <div>
+      <span id="primaryLabel">Torque</span>:
+      <span class="result-number" id="result1">0.00</span>
+      <span id="primaryUnit">N·m</span>
+    </div>
+    <br>
+    <div>
+      <span id="secondaryLabel">Torque / BW</span>:
+      <span class="result-number" id="result2">0.00</span>
+      <span id="secondaryUnit">N·m/kg</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Built with pure HTML + Vanilla JS · Clinically normalized outputs
+</div>
+
+<script>
+  const g = 9.81;
+
+  const mode = document.getElementById('mode');
+
+  const bwValue = document.getElementById('bwValue');
+  const bwUnit  = document.getElementById('bwUnit');
+
+  const mainValue = document.getElementById('mainValue');
+  const mainUnit  = document.getElementById('mainUnit');
+  const mainLabel = document.getElementById('mainLabel');
+
+  const lengthValue = document.getElementById('lengthValue');
+  const lengthUnit  = document.getElementById('lengthUnit');
+
+  const result1 = document.getElementById('result1');
+  const result2 = document.getElementById('result2');
+
+  const primaryLabel   = document.getElementById('primaryLabel');
+  const primaryUnit    = document.getElementById('primaryUnit');
+  const secondaryLabel = document.getElementById('secondaryLabel');
+  const secondaryUnit  = document.getElementById('secondaryUnit');
+
+  const submitBtn = document.getElementById('submitBtn');
+  const resetBtn  = document.getElementById('resetBtn');
+
+  function toKg(v,u){ return u === 'kg' ? v : v * 0.45359237; }
+  function toM(v,u){ return u === 'm' ? v : u === 'cm' ? v / 100 : v * 0.0254; }
+  function toN(v,u){
+    if(u === 'N') return v;
+    if(u === 'kg') return v * g;
+    if(u === 'lb') return v * 4.44822;
+    return 0;
+  }
+
+  function updateUI() {
+    if (mode.value === 'forceToTorque') {
+      mainLabel.textContent = 'Force:';
+      mainUnit.innerHTML = `
+        <option value="N">N</option>
+        <option value="kg">kg</option>
+        <option value="lb">lb</option>
+      `;
+      primaryLabel.textContent = 'Torque';
+      primaryUnit.textContent = 'N·m';
+      secondaryLabel.textContent = 'Torque / BW';
+      secondaryUnit.textContent = 'N·m/kg';
+    } else {
+      mainLabel.textContent = 'Torque:';
+      mainUnit.innerHTML = `<option value="Nm">N·m</option>`;
+      primaryLabel.textContent = 'Force';
+      primaryUnit.textContent = 'N';
+      secondaryLabel.textContent = 'Force / BW';
+      secondaryUnit.textContent = 'N/kg';
+    }
+  }
+
+  function update() {
+    const bw = parseFloat(bwValue.value);
+    const main = parseFloat(mainValue.value);
+    const len = parseFloat(lengthValue.value);
+
+    if (!bw || !main || !len) {
+      result1.textContent = '0.00';
+      result2.textContent = '0.00';
+      return;
+    }
+
+    const bwKg = toKg(bw, bwUnit.value);
+    const L = toM(len, lengthUnit.value);
+
+    let value, norm;
+
+    if (mode.value === 'forceToTorque') {
+      const F = toN(main, mainUnit.value);
+      value = F * L;
+      norm = value / bwKg;
+    } else {
+      value = main / L;
+      norm = value / bwKg;
+    }
+
+    result1.textContent = value.toFixed(2);
+    result2.textContent = norm.toFixed(2);
+  }
+
+  submitBtn.addEventListener('click', update);
+
+  resetBtn.addEventListener('click', () => {
+    bwValue.value = '';
+    mainValue.value = '';
+    lengthValue.value = '';
+    result1.textContent = '0.00';
+    result2.textContent = '0.00';
+  });
+
+  document.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', updateUI);
+    el.addEventListener('change', updateUI);
+  });
+
+  updateUI();
+</script>
+
+</body>
+</html>
