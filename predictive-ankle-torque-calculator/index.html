@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Predictive Ankle Torque - Normal Distribution</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  font-family:Segoe UI, sans-serif;
+  background:linear-gradient(135deg,#e0f2fe,#fef3c7);
+  color:#111;
+  margin:0;
+}
+.container{
+  max-width:1000px;
+  margin:auto;
+  padding:30px;
+}
+h1{text-align:center;color:#2563eb;}
+.card{
+  background:white;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:25px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+  overflow-wrap: break-word;
+}
+.controls{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
+  margin-bottom:20px;
+}
+label{font-weight:600;}
+input, select{
+  width:100%;
+  padding:8px;
+  font-size:1rem;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+button{
+  padding:10px 16px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+  background:#2563eb;
+  color:white;
+}
+canvas{width:100%;height:350px; border:1px solid #ccc; border-radius:12px;}
+.summary{
+  margin-top:15px;
+  padding:15px;
+  border-radius:12px;
+  background:#f1f5f9;
+  font-size:1rem;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+}
+th{background:#e5e7eb;}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Predictive Ankle Torque Calculator</h1>
+
+<div class="card">
+  <h3>Instructions for Examiner</h3>
+  <p>
+    The subject should be seated on an adjustable bench so that the hip, knee, and ankle form right angles, with the lower leg vertical and the foot flat on the dynamometer.<br>
+    For measuring ankle plantar-flexion, position the strap securely over the lower thigh and across the lateral malleolus.<br>
+    Instruct the subject to press the ball of their foot downward while keeping the heel on the bench, producing maximal plantar-flexion force.<br>
+    Provide verbal encouragement throughout the test to ensure maximal effort.<br>
+    Measure the lever arm as the distance from the head of the fifth metatarsal to the lower end of the lateral malleolus.
+  </p>
+</div>
+
+<div class="card controls">
+  <div>
+    <label>Age (years)</label>
+    <input type="number" id="age" min="5" max="80" value="0">
+  </div>
+  <div>
+    <label>Height (cm)</label>
+    <input type="number" id="height" min="120" max="220" value="0">
+  </div>
+  <div>
+    <label>Sex</label>
+    <select id="sex">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+  </div>
+  <div>
+    <label>Measured Strength</label>
+    <input type="number" id="measuredStrength" value="0">
+  </div>
+  <div>
+    <label>Strength Unit</label>
+    <select id="unit">
+      <option value="N">N</option>
+      <option value="lb">lb</option>
+      <option value="kgf">kgf</option>
+    </select>
+  </div>
+  <div>
+    <label>Lever Arm (cm)</label>
+    <input type="number" id="leverArm" value="0">
+  </div>
+  <div>
+    <label>Weight</label>
+    <input type="number" id="weight" value="0">
+  </div>
+  <div>
+    <label>Weight Unit</label>
+    <select id="weightUnit">
+      <option value="kg">kg</option>
+      <option value="lb">lb</option>
+    </select>
+  </div>
+</div>
+
+<div class="card">
+  <canvas id="plot" width="1000" height="350"></canvas>
+  <div class="summary" id="summary"></div>
+  <button onclick="resetApp()">Reset</button>
+</div>
+
+<div class="card">
+<h3>Normative Reference Values (Plantar Flexion Torque, N·m)</h3>
+<table>
+<tr><th>Age (years)</th><th>Male Mean (SD)</th><th>Female Mean (SD)</th></tr>
+<tr><td>5–9</td><td>33.3 (8.9)</td><td>39.0 (5.6)</td></tr>
+<tr><td>10–14</td><td>81.3 (28.3)</td><td>79.2 (31.9)</td></tr>
+<tr><td>15–19</td><td>120.8 (35.4)</td><td>102.0 (20.9)</td></tr>
+<tr><td>20–29</td><td>121.9 (25.7)</td><td>103.7 (19.4)</td></tr>
+<tr><td>30–39</td><td>116.6 (25.7)</td><td>107.1 (23.2)</td></tr>
+<tr><td>40–49</td><td>118.5 (26.3)</td><td>98.4 (20.9)</td></tr>
+<tr><td>50–59</td><td>113.2 (10.5)</td><td>86.3 (20.2)</td></tr>
+<tr><td>60–69</td><td>104.6 (29.5)</td><td>90.2 (25.6)</td></tr>
+<tr><td>70–80</td><td>117.5 (21.9)</td><td>75.6 (21.0)</td></tr>
+</table>
+<p><em>Reference:</em> Moraux, A., Canal, A., Ollivier, G., Ledoux, I., Doppler, V., Payan, C., & Hogrel, J. Y. (2013). Ankle plantar-flexion torques measured by dynamometry in healthy subjects from 5 to 80 years. BMC Musculoskeletal Disorders, 14(1), 104.</p>
+</div>
+
+</div>
+
+<script>
+const plantarFlexNorms = [
+  {min:5,max:9, male:{mean:33.3, sd:8.9}, female:{mean:39.0, sd:5.6}},
+  {min:10,max:14, male:{mean:81.3, sd:28.3}, female:{mean:79.2, sd:31.9}},
+  {min:15,max:19, male:{mean:120.8, sd:35.4}, female:{mean:102.0, sd:20.9}},
+  {min:20,max:29, male:{mean:121.9, sd:25.7}, female:{mean:103.7, sd:19.4}},
+  {min:30,max:39, male:{mean:116.6, sd:25.7}, female:{mean:107.1, sd:23.2}},
+  {min:40,max:49, male:{mean:118.5, sd:26.3}, female:{mean:98.4, sd:20.9}},
+  {min:50,max:59, male:{mean:113.2, sd:10.5}, female:{mean:86.3, sd:20.2}},
+  {min:60,max:69, male:{mean:104.6, sd:29.5}, female:{mean:90.2, sd:25.6}},
+  {min:70,max:80, male:{mean:117.5, sd:21.9}, female:{mean:75.6, sd:21.0}}
+];
+
+const ctx = document.getElementById("plot").getContext("2d");
+const ageEl = document.getElementById("age");
+const heightEl = document.getElementById("height");
+const sexEl = document.getElementById("sex");
+const measuredEl = document.getElementById("measuredStrength");
+const unitEl = document.getElementById("unit");
+const leverEl = document.getElementById("leverArm");
+const weightEl = document.getElementById("weight");
+const weightUnitEl = document.getElementById("weightUnit");
+const summaryEl = document.getElementById("summary");
+
+function convertToN(strength, unit){
+  if(unit==="N") return strength;
+  if(unit==="lb") return strength*4.44822;
+  if(unit==="kgf") return strength*9.80665;
+  return strength;
+}
+
+function convertWeightToKg(weight, unit){
+  if(unit==="kg") return weight;
+  if(unit==="lb") return weight*0.453592;
+  return weight;
+}
+
+function computeMeasuredTorque(){
+  const strength = +measuredEl.value;
+  const unit = unitEl.value;
+  const lever = +leverEl.value;
+  if(strength===0 || lever===0) return 0;
+  return convertToN(strength,unit)*lever/100;
+}
+
+function draw(){
+  const age = +ageEl.value;
+  const sex = sexEl.value;
+  const measured = computeMeasuredTorque();
+  const weight = +weightEl.value;
+  const weightUnit = weightUnitEl.value;
+  const weightKg = convertWeightToKg(weight,weightUnit);
+
+  ctx.clearRect(0,0,1000,350);
+  summaryEl.textContent="";
+
+  const bracket = plantarFlexNorms.find(b => age>=b.min && age<=b.max);
+  if(!bracket) return;
+
+  const mean = bracket[sex].mean;
+  const sd = bracket[sex].sd;
+  const canvasWidth = 1000;
+  const canvasHeight = 350;
+
+  const points = [];
+  const step = (mean + 4*sd - (mean - 4*sd))/200;
+  let maxY = 0;
+  for(let x=mean-4*sd; x<=mean+4*sd; x+=step){
+    const y = (1/(sd*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*((x-mean)/sd)**2);
+    if(y>maxY) maxY=y;
+    points.push({x:x,y:y});
+  }
+
+  // Draw curve
+  ctx.beginPath();
+  points.forEach((p,i)=>{
+    const px = ((p.x-(mean-4*sd))/(8*sd))*canvasWidth;
+    const py = canvasHeight - p.y/maxY*250 - 70;
+    if(i===0) ctx.moveTo(px,py);
+    else ctx.lineTo(px,py);
+  });
+  ctx.strokeStyle="#2563eb";
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  // Draw SD lines
+  [-2,-1,1,2].forEach(n=>{
+    const xPos = ((mean+n*sd-(mean-4*sd))/(8*sd))*canvasWidth;
+    ctx.strokeStyle="#999";
+    ctx.setLineDash([3,3]);
+    ctx.beginPath();
+    ctx.moveTo(xPos,50);
+    ctx.lineTo(xPos,canvasHeight);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle="#111";
+    ctx.font = "32px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(`${n} SD`, xPos, 10);
+  });
+
+  // Draw measured torque marker (red)
+  if(measured>0){
+    let mX = ((measured-(mean-4*sd))/(8*sd))*canvasWidth;
+    mX = Math.min(Math.max(mX,30), canvasWidth-30);
+    const markerY = canvasHeight - 50;
+    ctx.fillStyle="#ff0000";
+    ctx.beginPath();
+    ctx.arc(mX, markerY, 10, 0, 2*Math.PI);
+    ctx.fill();
+
+    ctx.fillStyle="#ff0000";
+    ctx.font = "24px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText(`Measured`, mX, markerY - 15);
+    ctx.fillText(`${measured.toFixed(1)} N·m`, mX, markerY + 25);
+  }
+
+  // Draw mean line and label in center
+  const meanX = ((mean-(mean-4*sd))/(8*sd))*canvasWidth;
+  ctx.strokeStyle="#111";
+  ctx.setLineDash([5,5]);
+  ctx.beginPath();
+  ctx.moveTo(meanX,50);
+  ctx.lineTo(meanX,canvasHeight);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle="#111";
+  ctx.font = "32px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(`Mean: ${mean.toFixed(1)}`, meanX, canvasHeight/2);
+
+  // Compute torque/kg if weight provided
+  let torquePerKg="";
+  if(weightKg>0){
+    torquePerKg = `<b>Torque per kg: ${ (measured/weightKg).toFixed(2) } N·m/kg</b>`;
+  }
+
+  // Summary narrative
+  let interpret="";
+  if(measured<mean-2*sd) interpret="well below the expected range";
+  else if(measured<mean-sd) interpret="below the expected range";
+  else if(measured>mean+2*sd) interpret="well above the expected range";
+  else if(measured>mean+sd) interpret="above the expected range";
+  else interpret="within the expected range";
+
+  summaryEl.innerHTML = `For age ${age}, sex ${sex}, the measured plantar-flexion torque is ${interpret}.` +
+    (torquePerKg ? ` ${torquePerKg}` : "");
+}
+
+// Reset
+function resetApp(){
+  ageEl.value=0; heightEl.value=0; sexEl.value="male";
+  measuredEl.value=0; unitEl.value="N"; leverEl.value=0; weightEl.value=0; weightUnitEl.value="kg";
+  draw();
+}
+
+[ageEl,heightEl,sexEl,measuredEl,unitEl,leverEl,weightEl,weightUnitEl].forEach(el=>el.oninput=draw);
+draw();
+</script>
+</body>
+</html>
