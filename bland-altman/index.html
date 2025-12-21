@@ -15,16 +15,25 @@
   h1 {
     color: #007ACC;
   }
-  textarea {
+  .input-container {
+    display: inline-block;
+    text-align: left;
     width: 90%;
+    max-width: 700px;
+  }
+  textarea {
+    width: 100%;
     height: 80px;
-    margin: 10px 0;
+    margin-bottom: 10px;
     font-size: 1rem;
+    display: block;
   }
   button {
+    display: block;
+    width: 100%;
     background-color: #00A896;
     color: white;
-    padding: 10px 20px;
+    padding: 10px 0;
     border: none;
     border-radius: 5px;
     font-size: 1rem;
@@ -46,13 +55,11 @@
 <h1>Bland–Altman Plot</h1>
 <p>Paste paired data (Trial 1, Trial 2) separated by comma, tab, or space, one pair per line:</p>
 
-<!-- Textarea for data input -->
-<textarea id="dataInput" placeholder="Example: 40 42&#10;45 44&#10;50 52"></textarea>
-<br>
-<!-- Button placed immediately below textarea -->
-<button id="drawButton" onclick="drawPlot()">Draw Plot</button>
+<div class="input-container">
+  <textarea id="dataInput" placeholder="Example: 40 42&#10;45 44&#10;50 52"></textarea>
+  <button onclick="drawPlot()">Draw Plot</button>
+</div>
 
-<!-- Canvas for plot -->
 <canvas id="baCanvas" width="700" height="500"></canvas>
 
 <script>
@@ -60,18 +67,15 @@ function drawPlot() {
     const rawData = document.getElementById('dataInput').value.trim();
     if (!rawData) return alert('Please paste your paired data.');
 
-    // Parse data (comma, tab, or space)
     const pairs = rawData.split('\n').map(line => {
         const parts = line.trim().split(/[\t, ]+/).map(Number);
         return parts;
     });
 
-    // Validation
     if (pairs.some(p => p.length !== 2 || p.some(isNaN))) {
         return alert('Data format error. Each line must have two numbers separated by comma, tab, or space.');
     }
 
-    // Compute means and differences
     const means = pairs.map(p => (p[0] + p[1])/2);
     const diffs = pairs.map(p => p[1] - p[0]);
 
@@ -82,17 +86,14 @@ function drawPlot() {
     const loaUpper = meanDiff + 1.96*sdDiff;
     const loaLower = meanDiff - 1.96*sdDiff;
 
-    // Canvas setup
     const canvas = document.getElementById('baCanvas');
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Margins
     const margin = 60;
     const plotWidth = canvas.width - 2*margin;
     const plotHeight = canvas.height - 2*margin;
 
-    // Scale calculations
     const minX = Math.min(...means) - 5;
     const maxX = Math.max(...means) + 5;
     const minY = Math.min(loaLower, ...diffs) - 5;
@@ -104,7 +105,7 @@ function drawPlot() {
     function xToCanvas(x){ return margin + (x - minX)*scaleX; }
     function yToCanvas(y){ return canvas.height - margin - (y - minY)*scaleY; }
 
-    // Draw axes
+    // Axes
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -123,7 +124,7 @@ function drawPlot() {
     ctx.fillText('Difference (Trial2 - Trial1) [Newton]', 0,0);
     ctx.restore();
 
-    // Draw bias line
+    // Bias line
     ctx.strokeStyle = 'red';
     ctx.lineWidth = 2;
     ctx.setLineDash([5,5]);
@@ -135,7 +136,7 @@ function drawPlot() {
     ctx.fillStyle = 'red';
     ctx.fillText(`Bias: ${meanDiff.toFixed(2)} N`, xToCanvas(maxX)-80, yToCanvas(meanDiff)-5);
 
-    // Draw ±1.96 SD lines
+    // ±1.96 SD lines
     ctx.strokeStyle = 'blue';
     ctx.lineWidth = 2;
     ctx.setLineDash([5,5]);
@@ -153,7 +154,7 @@ function drawPlot() {
     ctx.fillText(`-1.96 SD: ${loaLower.toFixed(2)} N`, xToCanvas(maxX)-90, yToCanvas(loaLower)-5);
     ctx.setLineDash([]);
 
-    // Draw hollow circles for data points
+    // Hollow circles
     ctx.strokeStyle = '#007ACC';
     ctx.lineWidth = 2;
     pairs.forEach((p,i)=>{
