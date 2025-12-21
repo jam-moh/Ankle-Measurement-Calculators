@@ -1,20 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Ankle Measurement Calculators</title>
-<style>
-body{font-family:system-ui;background:#f4f7fb;padding:40px}
-.card{background:#fff;padding:20px;border-radius:12px;
-max-width:500px;margin:auto;box-shadow:0 10px 30px rgba(0,0,0,.1)}
-a{display:block;padding:12px;margin:10px 0;
-background:#2563eb;color:white;text-decoration:none;border-radius:8px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ankle Measurement Calculators</title>
+  <style>
+    /* General styles */
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #007ACC;
+      color: white;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+    main {
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      max-width: 800px;
+    }
+    .app-button {
+      display: block;
+      text-align: center;
+      padding: 1.2rem;
+      background-color: #00A896;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 0.5rem;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    .app-button:hover {
+      background-color: #028F79;
+      transform: scale(1.05);
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 2rem;
+    }
+  </style>
 </head>
 <body>
-<div class="card">
-<h2>Measurement & Reliability Tools</h2>
-<a href="CV/index.html">Coefficient of Variation</a>
-<a href="typical-error/index.html">Typical Error</a>
-</div>
+  <header>
+    <h1>Ankle Measurement Calculators</h1>
+  </header>
+
+  <main>
+    <p>Select a calculator to get started:</p>
+    <div class="button-grid">
+      <a href="cv/index.html" class="app-button">Coefficient of Variation &amp; MDC</a>
+      <a href="typical-error/index.html" class="app-button">Typical Error</a>
+      <a href="swc/index.html" class="app-button">SWC Calculator</a>
+      <a href="sem/index.html" class="app-button">SEM Calculator</a>
+      <a href="bland-altman/index.html" class="app-button">Bland–Altman Plot</a>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Ankle Measurement Calculators
+  </footer>
 </body>
 </html>
