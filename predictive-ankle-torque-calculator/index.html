@@ -222,7 +222,8 @@ function draw(){
   const step = (mean + 4*sd - (mean - 4*sd))/200;
   let maxY = 0;
   for(let x=mean-4*sd; x<=mean+4*sd; x+=step){
-    const y = (1/(sd*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*((x-mean)/sd)**2);
+    const z = (x - mean) / sd;
+    const y = (1 / (sd * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow(z, 2));
     if(y>maxY) maxY=y;
     points.push({x:x,y:y});
   }
