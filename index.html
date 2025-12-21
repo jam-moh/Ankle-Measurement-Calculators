@@ -1,87 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ankle Measurement Calculators</title>
-  <style>
-    /* General styles */
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      color: #222;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #007ACC;
-      color: white;
-      text-align: center;
-      padding: 2rem 1rem;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-    }
-    main {
-      padding: 2rem 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
-    }
-    .button-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-      width: 100%;
-      max-width: 900px;
-    }
-    .app-button {
-      display: block;
-      text-align: center;
-      padding: 1.2rem;
-      background-color: #00A896;
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-      border-radius: 0.5rem;
-      transition: background-color 0.3s, transform 0.2s;
-    }
-    .app-button:hover {
-      background-color: #028F79;
-      transform: scale(1.05);
-    }
-    footer {
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.9rem;
-      color: #555;
-      margin-top: 2rem;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ankle Measurement Calculators</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+
+  header {
+    background-color: #0052cc;
+    color: #fff;
+    text-align: center;
+    padding: 1rem 0;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .app-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 3rem;
+  }
+
+  .app-button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 1rem 1.5rem;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    transition: background-color 0.3s;
+  }
+
+  .app-button:hover {
+    background-color: #0056b3;
+  }
+
+  #qr-section {
+    margin-top: 3rem;
+  }
+
+  #qr-section h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #0052cc;
+  }
+
+  .qr-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  .card {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    text-align: center;
+    width: 200px;
+  }
+
+  .card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    color: #333;
+  }
+
+  .card img {
+    width: 150px;
+    height: auto;
+  }
+
+  .card p {
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 0.5rem;
+  }
+
+  footer {
+    text-align: center;
+    margin: 3rem 0 1rem 0;
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+</style>
 </head>
 <body>
-  <header>
-    <h1>Ankle Measurement Calculators</h1>
-  </header>
 
-  <main>
-    <p>Select a calculator to get started:</p>
-    <div class="button-grid">
-      <a href="cv/index.html" class="app-button">Coefficient of Variation &amp; MDC</a>
-      <a href="typical-error/index.html" class="app-button">Typical Error</a>
-      <a href="swc/index.html" class="app-button">SWC Calculator</a>
-      <a href="sem/index.html" class="app-button">SEM Calculator</a>
-      <a href="bland-altman/index.html" class="app-button">Bland–Altman Plot</a>
-      <a href="torque/index.html" class="app-button">Torque Calculator</a>
-      <a href="norm-apfs/index.html" class="app-button">NORM APFS</a>
-      <a href="predictive-ankle-torque-calculator/index.html" class="app-button">Predictive Ankle Torque Calculator</a>
+<header>
+  <h1>Ankle Measurement Calculators</h1>
+</header>
+
+<main>
+  <!-- Desktop Buttons Section -->
+  <div class="app-buttons">
+    <a href="cv/index.html" class="app-button">Coefficient of Variation</a>
+    <a href="typical-error/index.html" class="app-button">Typical Error</a>
+    <a href="mdc/index.html" class="app-button">MDC Calculator</a>
+    <a href="predictive-ankle-torque-calculator/index.html" class="app-button">Predictive Ankle Torque</a>
+    <a href="norm-apfs/index.html" class="app-button">Normative APFS</a>
+    <a href="bland-altman/index.html" class="app-button">Bland-Altman Plot</a>
+    <a href="torque-calculator/index.html" class="app-button">Torque Calculator</a>
+  </div>
+
+  <!-- QR Code Section for Mobile -->
+  <section id="qr-section">
+    <h2>Scan to Open on Mobile</h2>
+    <div class="qr-cards">
+      <div class="card">
+        <h3>Predictive Ankle Torque</h3>
+        <img src="qr/qr_predictive-ankle-torque.png" alt="QR code for Predictive Ankle Torque Calculator">
+        <p><a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/predictive-ankle-torque-calculator/index.html" target="_blank">Open App</a></p>
+      </div>
+
+      <div class="card">
+        <h3>Coefficient of Variation</h3>
+        <img src="qr/qr_cv.png" alt="QR code for Coefficient of Variation">
+      </div>
+
+      <div class="card">
+        <h3>Typical Error</h3>
+        <img src="qr/qr_typical-error.png" alt="QR code for Typical Error Calculator">
+      </div>
+
+      <div class="card">
+        <h3>Normative APFS</h3>
+        <img src="qr/qr_norm-apfs.png" alt="QR code for Normative APFS App">
+      </div>
+
+      <div class="card">
+        <h3>Bland-Altman Plot</h3>
+        <img src="qr/qr_bland-altman.png" alt="QR code for Bland-Altman Plot">
+      </div>
+
+      <div class="card">
+        <h3>Torque Calculator</h3>
+        <img src="qr/qr_.torque.png" alt="QR code for Torque Calculator">
+      </div>
     </div>
-  </main>
+  </section>
+</main>
 
-  <footer>
-    &copy; 2025 Ankle Measurement Calculators
-  </footer>
+<footer>
+  &copy; 2025 Your Name. All rights reserved.
+</footer>
+
 </body>
 </html>
