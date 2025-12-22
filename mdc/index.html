@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MDC Calculator (Sample-Level)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  font-family:Segoe UI, sans-serif;
+  background:#f8fafc;
+  margin:0;
+  padding:20px;
+  color:#111;
+}
+.container{
+  max-width:1100px;
+  margin:auto;
+}
+h1{text-align:center;color:#2563eb;}
+.card{
+  background:white;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+  margin-bottom:25px;
+}
+textarea{
+  width:100%;
+  min-height:160px;
+  font-family:monospace;
+  font-size:14px;
+  padding:10px;
+}
+button{
+  background:#2563eb;
+  color:white;
+  border:none;
+  padding:10px 18px;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+}
+button:hover{background:#1e40af;}
+.results{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+}
+.result-box{
+  background:#f1f5f9;
+  padding:12px;
+  border-radius:10px;
+}
+.highlight{
+  background:#dcfce7;
+  border:2px solid #22c55e;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+  font-size:0.95rem;
+}
+th,td{
+  border:1px solid #ccc;
+  padding:8px;
+}
+th{background:#e5e7eb;}
+.note{
+  font-size:0.9rem;
+  color:#333;
+  margin-top:10px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>Minimal Detectable Change (MDC₉₅)</h1>
+
+<div class="card">
+<h3>Paste Data (rows = participants, columns = trials)</h3>
+<p>Paste directly from Excel (tabs or spaces accepted).</p>
+<textarea id="dataInput"></textarea>
+<br><br>
+<button onclick="analyze()">Compute MDC</button>
+</div>
+
+<div class="card">
+<h3>Results</h3>
+<div class="results" id="results"></div>
+</div>
+
+<div class="card">
+<h3>Formulas Used (Sample-Level)</h3>
+
+<table>
+<tr>
+<th>Method</th>
+<th>Formula</th>
+<th>When Used</th>
+</tr>
+
+<tr>
+<td><b>Preferred (≥3 trials)</b></td>
+<td>
+SEM = √MSE<br>
+MDC₉₅ = 1.96 × √2 × √MSE
+</td>
+<td>
+Three or more trials, multiple participants
+</td>
+</tr>
+
+<tr>
+<td>Two-trial method</td>
+<td>
+SD<sub>diff</sub> = SD(Trial2 − Trial1)<br>
+MDC₉₅ = 1.96 × SD<sub>diff</sub>
+</td>
+<td>
+Exactly two trials
+</td>
+</tr>
+
+<tr>
+<td>CV-based (informational)</td>
+<td>
+MDC = Mean × CV × 1.96 × √2
+</td>
+<td>
+Exploratory / teaching only
+</td>
+</tr>
+
+<tr>
+<td>SEM from data</td>
+<td>
+SEM = SD / √n<br>
+MDC₉₅ = 1.96 × √2 × SEM
+</td>
+<td>
+Descriptive only (not preferred)
+</td>
+</tr>
+</table>
+
+<p class="note">
+<b>Key principle:</b> When ≥3 trials are available, SEM is derived from the ANOVA residual error (√MSE), not from the sample SD.
+ICC is reported to describe reliability quality but is not used to compute SEM.
+</p>
+
+<p class="note">
+<b>Reference:</b><br>
+Webber SC, Porter MM. Reliability of ankle isometric, isotonic, and isokinetic strength and power testing in older women.
+<i>Phys Ther.</i> 2009;89(1):87–97.
+</p>
+</div>
+
+</div>
+
+<script>
+function mean(arr){return arr.reduce((a,b)=>a+b,0)/arr.length;}
+function sd(arr){
+  const m=mean(arr);
+  return Math.sqrt(arr.reduce((s,x)=>s+(x-m)**2,0)/(arr.length-1));
+}
+
+function analyze(){
+  const raw=document.getElementById("dataInput").value.trim();
+  if(!raw)return;
+
+  const rows=raw.split("\n").map(r=>r.trim().split(/\s+/).map(Number));
+  const n=rows.length;
+  const k=rows[0].length;
+
+  const flat=rows.flat();
+  const sampleMean=mean(flat);
+  const sampleSD=sd(flat);
+
+  let html="";
+
+  html+=box("Participants",n);
+  html+=box("Trials per participant",k);
+  html+=box("Sample Mean",sampleMean.toFixed(2));
+  html+=box("Sample SD",sampleSD.toFixed(2));
+
+  if(k===2){
+    const diffs=rows.map(r=>r[1]-r[0]);
+    const sddiff=sd(diffs);
+    const mdc=1.96*sddiff;
+
+    html+=box("SD of Differences",sddiff.toFixed(2));
+    html+=box("MDC₉₅ (Preferred)",mdc.toFixed(2),"highlight");
+    html+=box("ICC","Not applicable");
+
+  }else{
+    // ANOVA residual (MSE)
+    const subjMeans=rows.map(r=>mean(r));
+    const grandMean=mean(subjMeans);
+
+    let ssError=0;
+    rows.forEach((r,i)=>{
+      r.forEach(x=>{
+        ssError+=(x-subjMeans[i])**2;
+      });
+    });
+    const dfError=n*(k-1);
+    const mse=ssError/dfError;
+    const sem=Math.sqrt(mse);
+    const mdc=1.96*Math.sqrt(2)*sem;
+
+    // ICC(3,1) consistency
+    let ssBetween=0;
+    subjMeans.forEach(m=>{
+      ssBetween+=k*(m-grandMean)**2;
+    });
+    const msBetween=ssBetween/(n-1);
+    const icc=(msBetween-mse)/(msBetween+(k-1)*mse);
+
+    const semData=sampleSD/Math.sqrt(n);
+    const mdcData=1.96*Math.sqrt(2)*semData;
+
+    html+=box("ICC (3,1, consistency)",icc.toFixed(3));
+    html+=box("SEM (√MSE)",sem.toFixed(2));
+    html+=box("MDC₉₅ (Preferred)",mdc.toFixed(2),"highlight");
+    html+=box("SEM from data",semData.toFixed(2));
+    html+=box("MDC from data",mdcData.toFixed(2));
+  }
+
+  document.getElementById("results").innerHTML=html;
+}
+
+function box(label,value,cls=""){
+  return `<div class="result-box ${cls}">
+    <b>${label}</b><br>${value}
+  </div>`;
+}
+</script>
+
+</body>
+</html>
