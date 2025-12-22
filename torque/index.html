@@ -265,10 +265,17 @@
     result2.textContent = '0.00';
   });
 
-  document.querySelectorAll('input, select').forEach(el => {
-    el.addEventListener('input', updateUI);
-    el.addEventListener('change', updateUI);
-  });
+ mode.addEventListener('change', () => {
+  updateUI();
+  update();
+});
+
+document.querySelectorAll('input, select').forEach(el => {
+  if (el !== mode) {
+    el.addEventListener('input', update);
+    el.addEventListener('change', update);
+  }
+});
 
   updateUI();
 </script>
