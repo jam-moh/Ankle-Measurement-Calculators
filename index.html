@@ -105,16 +105,32 @@
   }
 
 </style>
-  .qr-small {
-  width: 150px;  /* keeps all QR codes the same small size */
-  height: auto;
+</head>
+  .qr-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
 }
 
 .qr-card {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   text-align: center;
-  margin: 10px;
+  width: 200px; /* same size as other QR cards */
 }
-</head>
+
+.qr-card img {
+  width: 150px; /* QR image size consistent for all except MDC */
+  height: auto;
+}
+
+.qr-small {
+  width: 150px; /* smaller QR image */
+  height: auto;
+}
 <body>
 
 <header>
