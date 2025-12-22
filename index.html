@@ -4,102 +4,104 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ankle Measurement Calculators</title>
+
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f7fa;
-    color: #333;
-    margin: 0;
-    padding: 0;
-  }
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
 
-  header {
-    background-color: #0052cc;
-    color: #fff;
-    text-align: center;
-    padding: 1rem 0;
-  }
+header {
+  background-color: #0052cc;
+  color: #fff;
+  text-align: center;
+  padding: 1rem 0;
+}
 
-  h1 {
-    margin: 0;
-    font-size: 2rem;
-  }
+h1 {
+  margin: 0;
+  font-size: 2rem;
+}
 
-  main {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-  }
+main {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
 
-  /* Desktop buttons */
-  .app-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-    margin-bottom: 3rem;
-  }
+/* Desktop Buttons */
+.app-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
 
-  .app-button {
-    background-color: #007bff;
-    color: #fff;
-    padding: 1rem 1.5rem;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: bold;
-    text-align: center;
-    transition: background-color 0.3s;
-  }
+.app-button {
+  background-color: #007bff;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  text-align: center;
+  transition: background-color 0.3s;
+}
 
-  .app-button:hover {
-    background-color: #0056b3;
-  }
+.app-button:hover {
+  background-color: #0056b3;
+}
 
-  /* QR code section */
-  #qr-section {
-    margin-top: 3rem;
-  }
+/* QR Code Section */
+#qr-section {
+  margin-top: 3rem;
+}
 
-  #qr-section h2 {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    color: #0052cc;
-  }
+#qr-section h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #0052cc;
+}
 
-  .qr-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-  }
+.qr-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
 
-  .qr-card {
-    background-color: #fff;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    text-align: center;
-    width: 200px; /* consistent width for all QR codes */
-  }
+.qr-card {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  text-align: center;
+  width: 200px; /* same width for all QR cards */
+}
 
-  .qr-card img {
-    width: 150px;
-    height: auto;
-  }
+.qr-card img {
+  width: 150px;
+  height: auto;
+}
 
-  .qr-card p {
-    font-size: 0.85rem;
-    color: #555;
-    margin-top: 0.5rem;
-  }
+.qr-card p {
+  font-size: 0.85rem;
+  color: #555;
+  margin-top: 0.5rem;
+}
 
-  footer {
-    text-align: center;
-    margin: 3rem 0 1rem 0;
-    font-size: 0.9rem;
-    color: #555;
-  }
+footer {
+  text-align: center;
+  margin: 3rem 0 1rem 0;
+  font-size: 0.9rem;
+  color: #555;
+}
 </style>
+
 </head>
 <body>
 
@@ -108,7 +110,7 @@
 </header>
 
 <main>
-  <!-- Desktop Buttons -->
+  <!-- Desktop Buttons Section -->
   <div class="app-buttons">
     <a href="cv/index.html" class="app-button">Coefficient of Variation</a>
     <a href="typical-error/index.html" class="app-button">Typical Error</a>
@@ -119,51 +121,52 @@
     <a href="torque/index.html" class="app-button">Torque Calculator</a>
   </div>
 
-  <!-- QR Codes for Mobile -->
+  <!-- QR Code Section for Mobile -->
   <section id="qr-section">
     <h2>Scan to Open on Mobile</h2>
     <div class="qr-cards">
       <div class="qr-card">
+        <h3>Predictive Ankle Torque</h3>
+        <img src="qr/qr_predictive-ankle-torque.png" alt="QR code for Predictive Ankle Torque Calculator">
+        <p><a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/predictive-ankle-torque-calculator/index.html" target="_blank">Open App</a></p>
+      </div>
+
+      <div class="qr-card">
         <h3>Coefficient of Variation</h3>
         <img src="qr/qr_cv.png" alt="QR code for Coefficient of Variation">
-        <p><a href="cv/index.html" target="_blank">Open App</a></p>
+        <p><a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/cv/index.html" target="_blank">Open App</a></p>
       </div>
 
       <div class="qr-card">
         <h3>Typical Error</h3>
         <img src="qr/qr_typical-error.png" alt="QR code for Typical Error Calculator">
-        <p><a href="typical-error/index.html" target="_blank">Open App</a></p>
-      </div>
-
-      <div class="qr-card">
-        <h3>MDC Calculator</h3>
-        <img src="qr/qr_mdc.png" alt="QR code for MDC Calculator">
-        <p><a href="mdc/index.html" target="_blank">Open App</a></p>
-      </div>
-
-      <div class="qr-card">
-        <h3>Predictive Ankle Torque</h3>
-        <img src="qr/qr_predictive-ankle-torque.png" alt="QR code for Predictive Ankle Torque Calculator">
-        <p><a href="predictive-ankle-torque-calculator/index.html" target="_blank">Open App</a></p>
+        <p><a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/typical-error/index.html" target="_blank">Open App</a></p>
       </div>
 
       <div class="qr-card">
         <h3>Normative APFS</h3>
         <img src="qr/qr_norm-apfs.png" alt="QR code for Normative APFS App">
-        <p><a href="norm-apfs/index.html" target="_blank">Open App</a></p>
+        <p><a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/norm-apfs/index.html" target="_blank">Open App</a></p>
       </div>
 
       <div class="qr-card">
         <h3>Bland-Altman Plot</h3>
         <img src="qr/qr_bland-altman.png" alt="QR code for Bland-Altman Plot">
-        <p><a href="bland-altman/index.html" target="_blank">Open App</a></p>
+        <p><a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/bland-altman/index.html" target="_blank">Open App</a></p>
       </div>
 
       <div class="qr-card">
         <h3>Torque Calculator</h3>
         <img src="qr/qr_torque.png" alt="QR code for Torque Calculator">
-        <p><a href="torque/index.html" target="_blank">Open App</a></p>
+        <p><a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/torque/index.html" target="_blank">Open App</a></p>
       </div>
+
+      <div class="qr-card">
+        <h3>MDC Calculator</h3>
+        <img src="qr/qr_mdc.png" alt="QR code for MDC Calculator">
+        <p><a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/mdc/index.html" target="_blank">Open App</a></p>
+      </div>
+
     </div>
   </section>
 </main>
