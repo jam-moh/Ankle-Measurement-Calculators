@@ -4,42 +4,57 @@
 <meta charset="UTF-8">
 <title>SWC Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body {
-  font-family: Segoe UI, sans-serif;
-  background: linear-gradient(135deg,#e0f2fe,#fef3c7);
-  color: #111;
+body{
+  font-family:Segoe UI,sans-serif;
+  background:linear-gradient(135deg,#e0f2fe,#fef3c7);
   margin:0;
-  padding:0;
+  color:#111;
 }
-.container{
-  max-width: 1000px;
-  margin:auto;
-  padding:30px;
+
+.back-btn{
+  position:fixed;
+  top:15px;
+  left:15px;
+  background:#1e40af;
+  color:white;
+  padding:8px 14px;
+  border-radius:10px;
+  text-decoration:none;
+  font-weight:600;
+  z-index:10;
 }
+
+.container{max-width:1000px;margin:auto;padding:30px;}
+
 h1{text-align:center;color:#2563eb;}
+
 .card{
   background:white;
   border-radius:16px;
   padding:20px;
   margin-bottom:25px;
   box-shadow:0 10px 25px rgba(0,0,0,.08);
-  overflow-wrap: break-word;
 }
+
 .controls{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
   gap:15px;
-  margin-bottom:20px;
 }
+
 label{font-weight:600;}
-input{
+input,textarea{
   width:100%;
   padding:8px;
   font-size:1rem;
   border-radius:8px;
   border:1px solid #ccc;
 }
+
+textarea{height:120px;resize:vertical;}
+
 button{
   padding:10px 16px;
   margin-top:10px;
@@ -50,7 +65,14 @@ button{
   background:#2563eb;
   color:white;
 }
-canvas{width:100%;height:350px; border:1px solid #ccc; border-radius:12px;}
+
+canvas{
+  width:100%;
+  height:350px;
+  border:1px solid #ccc;
+  border-radius:12px;
+}
+
 .summary{
   margin-top:15px;
   padding:15px;
@@ -58,6 +80,7 @@ canvas{width:100%;height:350px; border:1px solid #ccc; border-radius:12px;}
   background:#f1f5f9;
   font-size:1rem;
 }
+
 table{
   width:100%;
   border-collapse:collapse;
@@ -70,21 +93,44 @@ th,td{
 th{background:#e5e7eb;}
 </style>
 </head>
+
 <body>
+
+<a class="back-btn" href="https://jam-moh.github.io/Ankle-Measurement-Calculators/">← Back</a>
+
 <div class="container">
 <h1>Smallest Worthwhile Change (SWC) Calculator</h1>
 
+<div class="card">
+<h3>Paste Paired Data (Pre / Post)</h3>
+<p>
+Paste two columns of paired values (Pre → Post).  
+Values may be <strong>space- or tab-separated</strong>.  
+One pair per row. <strong>No commas.</strong>
+</p>
+
+<textarea id="dataInput" placeholder="Example:
+23.3   31.3
+18.8   26.3
+24.7   26.3
+26.1   33.9
+31.9   18.9
+23.9   23.8"></textarea>
+
+<button onclick="usePastedData()">Use Pasted Data</button>
+</div>
+
 <div class="card controls">
   <div>
-    <label>Baseline Measurement</label>
+    <label>Baseline Mean</label>
     <input type="number" id="baseline" value="0">
   </div>
   <div>
-    <label>Follow-up Measurement</label>
+    <label>Follow-up Mean</label>
     <input type="number" id="followup" value="0">
   </div>
   <div>
-    <label>Standard Deviation (SD)</label>
+    <label>SD of Change Scores</label>
     <input type="number" id="sd" value="0">
   </div>
   <div>
@@ -102,7 +148,7 @@ th{background:#e5e7eb;}
 <div class="card">
 <h3>Effect Size Interpretation (Hopkins 2002)</h3>
 <table>
-<tr><th>Magnitude</th><th>Effect Size (Cohen's d)</th><th>Difference in Means (×SD)</th></tr>
+<tr><th>Magnitude</th><th>Effect Size (Cohen’s d)</th><th>Difference in Means (×SD)</th></tr>
 <tr><td>Trivial</td><td>0.0</td><td>0.0</td></tr>
 <tr><td>Small</td><td>0.1</td><td>0.2</td></tr>
 <tr><td>Moderate</td><td>0.3</td><td>0.6</td></tr>
@@ -111,127 +157,110 @@ th{background:#e5e7eb;}
 <tr><td>Nearly Perfect</td><td>0.9</td><td>4.0</td></tr>
 <tr><td>Perfect</td><td>1.0</td><td>∞</td></tr>
 </table>
-<p><em>Reference:</em> Hopkins WG. A spreadsheet for effect size. <a href="https://www.sportsci.org/resource/stats/effectmag.html" target="_blank">sportsci.org</a></p>
+
+<p>
+<em>Reference:</em> Hopkins WG. A spreadsheet for effect size.
+<a href="https://www.sportsci.org/resource/stats/effectmag.html" target="_blank">sportsci.org</a>
+</p>
 </div>
 
 </div>
 
 <script>
-const baselineEl = document.getElementById("baseline");
-const followupEl = document.getElementById("followup");
-const sdEl = document.getElementById("sd");
-const nEl = document.getElementById("n");
-const summaryEl = document.getElementById("summary");
-const ctx = document.getElementById("plot").getContext("2d");
+const baselineEl=document.getElementById("baseline");
+const followupEl=document.getElementById("followup");
+const sdEl=document.getElementById("sd");
+const nEl=document.getElementById("n");
+const summaryEl=document.getElementById("summary");
+const ctx=document.getElementById("plot").getContext("2d");
 
-function computeSWC(){
-  const baseline = +baselineEl.value;
-  const followup = +followupEl.value;
-  const sd = +sdEl.value;
-  const n = +nEl.value;
-  if(sd<=0 || n<1) return null;
-
-  const change = followup - baseline;
-  const effectSize = change / sd;
-  const swcSmall = 0.2 * sd;
-  const swcModerate = 0.6 * sd;
-  const sem = sd / Math.sqrt(n);
-
-  let interpretation="";
-  if(Math.abs(effectSize)<0.1) interpretation="Trivial";
-  else if(Math.abs(effectSize)<0.3) interpretation="Small";
-  else if(Math.abs(effectSize)<0.5) interpretation="Moderate";
-  else if(Math.abs(effectSize)<0.7) interpretation="Large";
-  else if(Math.abs(effectSize)<0.9) interpretation="Very Large";
-  else interpretation="Nearly Perfect/Perfect";
-
-  return {change,effectSize,swcSmall,swcModerate,sem,interpretation,baseline,followup,sd};
+function mean(arr){return arr.reduce((a,b)=>a+b,0)/arr.length;}
+function sd(arr){
+  const m=mean(arr);
+  return Math.sqrt(arr.reduce((s,v)=>s+(v-m)**2,0)/(arr.length-1));
 }
 
-function drawPlot(data){
-  ctx.clearRect(0,0,1000,350);
+function usePastedData(){
+  const lines=document.getElementById("dataInput").value.trim().split(/\n+/);
+  const pre=[], post=[];
 
-  const mean = data.baseline;
-  const sd = data.sd;
-  const canvasWidth = 1000;
-  const canvasHeight = 350;
+  lines.forEach(line=>{
+    const parts=line.trim().split(/\s+/);
+    if(parts.length>=2){
+      const a=Number(parts[0]), b=Number(parts[1]);
+      if(!isNaN(a)&&!isNaN(b)){pre.push(a); post.push(b);}
+    }
+  });
 
-  const points = [];
-  const step = (mean + 4*sd - (mean - 4*sd))/200;
-  let maxY = 0;
-  for(let x=mean-4*sd; x<=mean+4*sd; x+=step){
-    const y = (1/(sd*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*((x-mean)/sd)**2);
-    if(y>maxY) maxY=y;
-    points.push({x:x,y:y});
+  if(pre.length<2){
+    alert("At least two paired observations are required.");
+    return;
   }
 
-  // Draw curve
+  const changeScores=post.map((v,i)=>v-pre[i]);
+
+  baselineEl.value=mean(pre).toFixed(2);
+  followupEl.value=mean(post).toFixed(2);
+  sdEl.value=sd(changeScores).toFixed(2);
+  nEl.value=pre.length;
+
+  updateApp();
+}
+
+function computeSWC(){
+  const baseline=+baselineEl.value;
+  const followup=+followupEl.value;
+  const sd=+sdEl.value;
+  const n=+nEl.value;
+  if(sd<=0||n<1) return null;
+
+  const change=followup-baseline;
+  const effectSize=change/sd;
+  const swcSmall=0.2*sd;
+  const swcModerate=0.6*sd;
+  const sem=sd/Math.sqrt(n);
+
+  let interpretation="Trivial";
+  if(Math.abs(effectSize)>=0.9) interpretation="Nearly Perfect / Perfect";
+  else if(Math.abs(effectSize)>=0.7) interpretation="Very Large";
+  else if(Math.abs(effectSize)>=0.5) interpretation="Large";
+  else if(Math.abs(effectSize)>=0.3) interpretation="Moderate";
+  else if(Math.abs(effectSize)>=0.1) interpretation="Small";
+
+  return{baseline,followup,sd,change,effectSize,swcSmall,swcModerate,sem,interpretation};
+}
+
+function drawPlot(d){
+  ctx.clearRect(0,0,1000,350);
+  const meanVal=d.baseline, sdVal=d.sd;
+  const w=1000, h=350;
+  let maxY=0, pts=[];
+
+  for(let x=meanVal-4*sdVal;x<=meanVal+4*sdVal;x+=sdVal/20){
+    const y=Math.exp(-0.5*((x-meanVal)/sdVal)**2);
+    maxY=Math.max(maxY,y);
+    pts.push({x,y});
+  }
+
   ctx.beginPath();
-  points.forEach((p,i)=>{
-    const px = ((p.x-(mean-4*sd))/(8*sd))*canvasWidth;
-    const py = canvasHeight - p.y/maxY*250 - 70;
-    if(i===0) ctx.moveTo(px,py);
-    else ctx.lineTo(px,py);
+  pts.forEach((p,i)=>{
+    const px=(p.x-(meanVal-4*sdVal))/(8*sdVal)*w;
+    const py=h-p.y/maxY*250-60;
+    i?ctx.lineTo(px,py):ctx.moveTo(px,py);
   });
-  ctx.strokeStyle="#2563eb";
-  ctx.lineWidth=2;
-  ctx.stroke();
-
-  // Draw SWC small and moderate
-  [data.baseline + data.swcSmall, data.baseline - data.swcSmall].forEach(val=>{
-    const x = ((val-(mean-4*sd))/(8*sd))*canvasWidth;
-    ctx.strokeStyle="#00b300";
-    ctx.setLineDash([5,5]);
-    ctx.beginPath();
-    ctx.moveTo(x,50);
-    ctx.lineTo(x,canvasHeight);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle="#00b300";
-    ctx.font="16px sans-serif";
-    ctx.textAlign="center";
-    ctx.fillText("SWC Small", x, 20);
-  });
-
-  [data.baseline + data.swcModerate, data.baseline - data.swcModerate].forEach(val=>{
-    const x = ((val-(mean-4*sd))/(8*sd))*canvasWidth;
-    ctx.strokeStyle="#ffa500";
-    ctx.setLineDash([5,5]);
-    ctx.beginPath();
-    ctx.moveTo(x,50);
-    ctx.lineTo(x,canvasHeight);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle="#ffa500";
-    ctx.font="16px sans-serif";
-    ctx.textAlign="center";
-    ctx.fillText("SWC Moderate", x, 40);
-  });
-
-  // Draw follow-up marker
-  const followupX = ((data.followup-(mean-4*sd))/(8*sd))*canvasWidth;
-  const markerY = canvasHeight - 50;
-  ctx.fillStyle="#ff0000";
-  ctx.beginPath();
-  ctx.arc(followupX, markerY, 10, 0, 2*Math.PI);
-  ctx.fill();
-  ctx.fillStyle="#ff0000";
-  ctx.font="18px sans-serif";
-  ctx.textAlign="center";
-  ctx.textBaseline="bottom";
-  ctx.fillText(`Follow-up: ${data.followup}`, followupX, markerY-15);
+  ctx.strokeStyle="#2563eb"; ctx.lineWidth=2; ctx.stroke();
 }
 
 function updateApp(){
-  const data = computeSWC();
-  if(!data) return;
-  drawPlot(data);
-  summaryEl.innerHTML = `Absolute Change: <b>${data.change.toFixed(2)}</b><br>
-Effect Size (Cohen's d): <b>${data.effectSize.toFixed(2)}</b><br>
-SWC (Small): <b>${data.swcSmall.toFixed(2)}</b><br>
-SWC (Moderate): <b>${data.swcModerate.toFixed(2)}</b><br>
-SEM: <b>${data.sem.toFixed(2)}</b><br>
-Interpretation: <b>${data.interpretation}</b>`;
+  const d=computeSWC(); if(!d) return;
+  drawPlot(d);
+  summaryEl.innerHTML=`
+  Absolute Change: <b>${d.change.toFixed(2)}</b><br>
+  Effect Size (Cohen’s d): <b>${d.effectSize.toFixed(2)}</b><br>
+  SWC (Small): <b>${d.swcSmall.toFixed(2)}</b><br>
+  SWC (Moderate): <b>${d.swcModerate.toFixed(2)}</b><br>
+  SEM: <b>${d.sem.toFixed(2)}</b><br>
+  Interpretation: <b>${d.interpretation}</b>`;
 }
 
 function resetApp(){
@@ -240,8 +269,8 @@ function resetApp(){
   summaryEl.textContent="";
 }
 
-[baselineEl, followupEl, sdEl, nEl].forEach(el=>el.oninput=updateApp);
-updateApp();
+[baselineEl,followupEl,sdEl,nEl].forEach(el=>el.oninput=updateApp);
 </script>
+
 </body>
 </html>
