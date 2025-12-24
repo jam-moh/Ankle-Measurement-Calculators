@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TE, CV & SWC Calculator (Hopkins)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  font-family:Segoe UI, sans-serif;
+  background:#f1f5f9;
+  margin:0;
+  padding:0;
+}
+.container{
+  max-width:950px;
+  margin:90px auto;
+  background:white;
+  padding:30px;
+  border-radius:18px;
+  box-shadow:0 12px 35px rgba(0,0,0,0.12);
+}
+h1{
+  text-align:center;
+  color:#1e40af;
+  margin-bottom:5px;
+}
+.subtitle{
+  text-align:center;
+  color:#555;
+  margin-bottom:25px;
+}
+textarea{
+  width:100%;
+  height:180px;
+  font-family:monospace;
+  font-size:0.95em;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #ccc;
+}
+button{
+  margin-top:18px;
+  padding:12px 22px;
+  font-size:1em;
+  border:none;
+  border-radius:12px;
+  background:#2563eb;
+  color:white;
+  cursor:pointer;
+}
+button:hover{background:#1e40af;}
+.result{
+  margin-top:25px;
+  padding:18px;
+  background:#eef2ff;
+  border-radius:14px;
+  font-size:1.05em;
+}
+.card{
+  margin-top:30px;
+  padding:20px;
+  background:#f8fafc;
+  border-radius:14px;
+}
+pre{
+  background:#e5e7eb;
+  padding:10px;
+  border-radius:8px;
+  font-size:0.95em;
+}
+.note{
+  background:#fff7ed;
+  border-left:5px solid #f59e0b;
+  padding:12px;
+  border-radius:10px;
+  margin-top:15px;
+  font-size:0.95em;
+}
+hr{margin:18px 0;}
+.back{
+  position:fixed;
+  top:15px;
+  left:15px;
+  text-decoration:none;
+  background:#1e40af;
+  color:white;
+  padding:8px 14px;
+  border-radius:10px;
+  font-weight:600;
+}
+small{color:#555;}
+</style>
+</head>
+
+<body>
+
+<!-- RETURN BUTTON -->
+<a class="back" href="https://jam-moh.github.io/Ankle-Measurement-Calculators/">← Return</a>
+
+<div class="container">
+<h1>TE, CV & SWC Calculator</h1>
+<div class="subtitle">Will Hopkins Method (Log-Based)</div>
+
+<p><b>Paste repeated trials</b><br>
+Rows = subjects, columns = trials (space or tab separated)</p>
+
+<textarea id="dataInput" placeholder="Example:
+23.3 31.3
+18.8 26.3
+24.7 26.3
+26.1 33.9"></textarea>
+
+<button onclick="analyze()">Calculate</button>
+
+<div id="output" class="result"></div>
+
+<!-- FORMULAS & CLARIFICATION -->
+<div class="card">
+<h3>Formulas, Definitions & Clarifications</h3>
+
+<p><b>1. Typical Error (Raw Scale)</b></p>
+<pre>TE = SD(differences) / √2</pre>
+<p>
+<b>differences</b> = within-subject differences between repeated trials<br>
+<b>SD</b> = standard deviation of those differences
+</p>
+
+<hr>
+
+<p><b>2. Log-Transformed Typical Error</b></p>
+<pre>TE_ln = SD[ ln(x₂) − ln(x₁) ] / √2</pre>
+<p>
+Assumes a <b>multiplicative error structure</b> (Hopkins).
+</p>
+
+<hr>
+
+<p><b>3. Coefficient of Variation (CV)</b></p>
+<pre>CV (%) = 100 × √( e^(TE_ln²) − 1 )</pre>
+<p>
+CV reflects <b>within-subject measurement noise</b>, not between-subject variability.
+</p>
+
+<hr>
+
+<p><b>4. Absolute Typical Error</b></p>
+<pre>TE_absolute = (CV / 100) × grand mean</pre>
+
+<hr>
+
+<p><b>5. Smallest Worthwhile Change (SWC)</b></p>
+<pre>SWC = 0.2 × SD_between</pre>
+
+<div class="note">
+<b>Important:</b><br>
+• ALL trial columns are used<br>
+• Trials are first <b>averaged within each subject</b><br>
+• SD is then computed <b>across subject means</b><br><br>
+This ensures SWC reflects <b>true between-subject signal</b>, not measurement noise.
+</div>
+
+<hr>
+
+<p><b>6. Decision Rule</b></p>
+<pre>
+TE_absolute < SWC → meaningful change detectable
+TE_absolute ≥ SWC → noise exceeds worthwhile change
+</pre>
+
+<div class="card">
+  <h3>References</h3>
+  <ul>
+    <li>Hopkins WG. A spreadsheet for analysis of controlled trials, with adjustment for small sample sizes. <em>Sportscience</em>. 2000;4:45-52.</li>
+    <li>Hopkins WG. A spreadsheet for effect size, confidence limits, and related statistics. <a href="https://www.sportsci.org/resource/stats/effectmag.html" target="_blank">sportsci.org</a></li>
+  </ul>
+  <p><em>Note:</em> Absolute Typical Error (TE_absolute) is not part of Hopkins’ original spreadsheet; it is added in this app for practical interpretation.</p>
+</div>
+
+</div>
+
+</div>
+
+<script>
+function mean(arr){
+  return arr.reduce((a,b)=>a+b,0)/arr.length;
+}
+
+function sd(arr){
+  const m = mean(arr);
+  return Math.sqrt(arr.reduce((s,x)=>s+(x-m)**2,0)/(arr.length-1));
+}
+
+function analyze(){
+  const raw = document.getElementById("dataInput").value.trim();
+  if(!raw){ alert("Paste data first"); return; }
+
+  const rows = raw.split(/\n+/).map(r =>
+    r.trim().split(/\s+/).map(Number).filter(x=>!isNaN(x))
+  ).filter(r=>r.length>=2);
+
+  if(rows.length<2){
+    alert("Need at least 2 subjects with ≥2 trials");
+    return;
+  }
+
+  /* RAW TE */
+  let diffs = [];
+  rows.forEach(r=>{
+    for(let i=1;i<r.length;i++){
+      diffs.push(r[i]-r[i-1]);
+    }
+  });
+  const TE = sd(diffs)/Math.sqrt(2);
+
+  /* LOG TE */
+  let logDiffs = [];
+  rows.forEach(r=>{
+    for(let i=1;i<r.length;i++){
+      logDiffs.push(Math.log(r[i]) - Math.log(r[i-1]));
+    }
+  });
+  const TE_ln = sd(logDiffs)/Math.sqrt(2);
+
+  /* CV */
+  const CV = 100 * Math.sqrt(Math.exp(TE_ln**2) - 1);
+
+  /* ABSOLUTE TE */
+  const allValues = rows.flat();
+  const grandMean = mean(allValues);
+  const TE_abs = (CV/100) * grandMean;
+
+  /* SWC (subject means) */
+  const subjectMeans = rows.map(r=>mean(r));
+  const SD_between = sd(subjectMeans);
+  const SWC = 0.2 * SD_between;
+
+  /* DECISION */
+  const decision = TE_abs < SWC
+    ? "✅ TE < SWC → Meaningful change can be detected"
+    : "⚠️ TE ≥ SWC → Measurement noise exceeds worthwhile change";
+
+  document.getElementById("output").innerHTML = `
+<b>Typical Error (raw):</b> ${TE.toFixed(3)}<br>
+<b>Log Typical Error:</b> ${TE_ln.toFixed(4)}<br>
+<b>Coefficient of Variation:</b> ${CV.toFixed(2)} %<br>
+<b>Absolute Typical Error:</b> ${TE_abs.toFixed(2)}<br>
+<b>SWC:</b> ${SWC.toFixed(2)}<br><br>
+<b>Decision:</b><br>${decision}
+`;
+}
+</script>
+
+</body>
+</html>
