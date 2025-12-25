@@ -16,7 +16,7 @@
       min-height: 100vh;
     }
 
-Back to landing page button */
+    /* Back to landing page button */
     .back-home {
       align-self: flex-start;
       margin-bottom: 15px;
@@ -113,22 +113,6 @@ Back to landing page button */
       color: #aaa;
       text-align: center;
     }
-.back-home {
-  align-self: flex-start;
-  margin-bottom: 15px;
-  padding: 6px 12px;
-  background-color: rgba(255,255,255,0.15);
-  color: #00ffd5;
-  text-decoration: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.back-home:hover {
-  background-color: rgba(255,255,255,0.25);
-}
-    
   </style>
 </head>
 
@@ -137,186 +121,208 @@ Back to landing page button */
   <a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/"
    class="back-home">
   ← Back to Landing Page
-</a>
+  </a>
   
-<h1>🦵 Torque ⇄ Force Calculator</h1>
+  <h1>🦵 Torque ⇄ Force Calculator</h1>
 
-<div class="container">
+  <div class="container">
 
-  <!-- MODE -->
-  <div class="input-group">
-    <label>Calculation Mode:</label>
-    <select id="mode">
-      <option value="forceToTorque">Force → Torque</option>
-      <option value="torqueToForce">Torque → Force</option>
-    </select>
-  </div>
-
-  <!-- BODY WEIGHT -->
-  <div class="input-group">
-    <label>Body Weight:</label>
-    <input type="number" id="bwValue" step="any" min="0">
-    <select id="bwUnit">
-      <option value="kg">kg</option>
-      <option value="lb">lb</option>
-    </select>
-  </div>
-
-  <!-- MAIN INPUT -->
-  <div class="input-group">
-    <label id="mainLabel">Force:</label>
-    <input type="number" id="mainValue" step="any" min="0">
-    <select id="mainUnit"></select>
-  </div>
-
-  <!-- LENGTH -->
-  <div class="input-group">
-    <label>Moment Arm Length:</label>
-    <input type="number" id="lengthValue" step="any" min="0">
-    <select id="lengthUnit">
-      <option value="m">m</option>
-      <option value="cm">cm</option>
-      <option value="in">in</option>
-    </select>
-  </div>
-
-  <!-- BUTTONS -->
-  <div class="button-group">
-    <button class="submit" id="submitBtn">Submit</button>
-    <button class="reset" id="resetBtn">Reset</button>
-  </div>
-
-  <!-- RESULTS -->
-  <div class="results">
-    <div>
-      <span id="primaryLabel">Torque</span>:
-      <span class="result-number" id="result1">0.00</span>
-      <span id="primaryUnit">N·m</span>
+    <!-- MODE -->
+    <div class="input-group">
+      <label>Calculation Mode:</label>
+      <select id="mode">
+        <option value="forceToTorque">Force → Torque</option>
+        <option value="torqueToForce">Torque → Force</option>
+      </select>
     </div>
-    <br>
-    <div>
-      <span id="secondaryLabel">Torque / BW</span>:
-      <span class="result-number" id="result2">0.00</span>
-      <span id="secondaryUnit">N·m/kg</span>
-    </div>
-  </div>
 
-</div>
-
-<div class="footer">
-  Built with pure HTML + Vanilla JS · Clinically normalized outputs
-</div>
-
-<script>
-  const g = 9.81;
-
-  const mode = document.getElementById('mode');
-
-  const bwValue = document.getElementById('bwValue');
-  const bwUnit  = document.getElementById('bwUnit');
-
-  const mainValue = document.getElementById('mainValue');
-  const mainUnit  = document.getElementById('mainUnit');
-  const mainLabel = document.getElementById('mainLabel');
-
-  const lengthValue = document.getElementById('lengthValue');
-  const lengthUnit  = document.getElementById('lengthUnit');
-
-  const result1 = document.getElementById('result1');
-  const result2 = document.getElementById('result2');
-
-  const primaryLabel   = document.getElementById('primaryLabel');
-  const primaryUnit    = document.getElementById('primaryUnit');
-  const secondaryLabel = document.getElementById('secondaryLabel');
-  const secondaryUnit  = document.getElementById('secondaryUnit');
-
-  const submitBtn = document.getElementById('submitBtn');
-  const resetBtn  = document.getElementById('resetBtn');
-
-  function toKg(v,u){ return u === 'kg' ? v : v * 0.45359237; }
-  function toM(v,u){ return u === 'm' ? v : u === 'cm' ? v / 100 : v * 0.0254; }
-  function toN(v,u){
-    if(u === 'N') return v;
-    if(u === 'kg') return v * g;
-    if(u === 'lb') return v * 4.44822;
-    return 0;
-  }
-
-  function updateUI() {
-    if (mode.value === 'forceToTorque') {
-      mainLabel.textContent = 'Force:';
-      mainUnit.innerHTML = `
-        <option value="N">N</option>
+    <!-- BODY WEIGHT -->
+    <div class="input-group">
+      <label>Body Weight:</label>
+      <input type="number" id="bwValue" step="any" min="0">
+      <select id="bwUnit">
         <option value="kg">kg</option>
         <option value="lb">lb</option>
-      `;
-      primaryLabel.textContent = 'Torque';
-      primaryUnit.textContent = 'N·m';
-      secondaryLabel.textContent = 'Torque / BW';
-      secondaryUnit.textContent = 'N·m/kg';
-    } else {
-      mainLabel.textContent = 'Torque:';
-      mainUnit.innerHTML = `<option value="Nm">N·m</option>`;
-      primaryLabel.textContent = 'Force';
-      primaryUnit.textContent = 'N';
-      secondaryLabel.textContent = 'Force / BW';
-      secondaryUnit.textContent = 'N/kg';
+      </select>
+    </div>
+
+    <!-- MAIN INPUT -->
+    <div class="input-group">
+      <label id="mainLabel">Force:</label>
+      <input type="number" id="mainValue" step="any" min="0">
+      <select id="mainUnit"></select>
+    </div>
+
+    <!-- LENGTH -->
+    <div class="input-group">
+      <label>Moment Arm Length:</label>
+      <input type="number" id="lengthValue" step="any" min="0">
+      <select id="lengthUnit">
+        <option value="m">m</option>
+        <option value="cm">cm</option>
+        <option value="in">in</option>
+      </select>
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="button-group">
+      <button class="submit" id="submitBtn">Submit</button>
+      <button class="reset" id="resetBtn">Reset</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results">
+      <div>
+        <span id="primaryLabel">Torque</span>:
+        <span class="result-number" id="result1">0.00</span>
+        <span id="primaryUnit">N·m</span>
+      </div>
+      <br>
+      <div>
+        <span id="secondaryLabel">Torque / BW</span>:
+        <span class="result-number" id="result2">0.00</span>
+        <span id="secondaryUnit">N·m/kg</span>
+      </div>
+      <br>
+      <div>
+        <span id="tertiaryLabel">Force / BW</span>:
+        <span class="result-number" id="result3">0.00</span>
+        <span id="tertiaryUnit">N/kg</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    Built with pure HTML + Vanilla JS · Clinically normalized outputs
+  </div>
+
+  <script>
+    const g = 9.81;
+
+    const mode = document.getElementById('mode');
+
+    const bwValue = document.getElementById('bwValue');
+    const bwUnit  = document.getElementById('bwUnit');
+
+    const mainValue = document.getElementById('mainValue');
+    const mainUnit  = document.getElementById('mainUnit');
+    const mainLabel = document.getElementById('mainLabel');
+
+    const lengthValue = document.getElementById('lengthValue');
+    const lengthUnit  = document.getElementById('lengthUnit');
+
+    const result1 = document.getElementById('result1');
+    const result2 = document.getElementById('result2');
+    const result3 = document.getElementById('result3');
+
+    const primaryLabel   = document.getElementById('primaryLabel');
+    const primaryUnit    = document.getElementById('primaryUnit');
+    const secondaryLabel = document.getElementById('secondaryLabel');
+    const secondaryUnit  = document.getElementById('secondaryUnit');
+    const tertiaryLabel  = document.getElementById('tertiaryLabel');
+    const tertiaryUnit   = document.getElementById('tertiaryUnit');
+
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn  = document.getElementById('resetBtn');
+
+    function toKg(v,u){ return u === 'kg' ? v : v * 0.45359237; }
+    function toM(v,u){ return u === 'm' ? v : u === 'cm' ? v / 100 : v * 0.0254; }
+    function toN(v,u){
+      if(u === 'N') return v;
+      if(u === 'kg') return v * g;
+      if(u === 'lb') return v * 4.44822;
+      return 0;
     }
-  }
 
-  function update() {
-    const bw = parseFloat(bwValue.value);
-    const main = parseFloat(mainValue.value);
-    const len = parseFloat(lengthValue.value);
+    function updateUI() {
+      if (mode.value === 'forceToTorque') {
+        mainLabel.textContent = 'Force:';
+        mainUnit.innerHTML = `
+          <option value="N">N</option>
+          <option value="kg">kg</option>
+          <option value="lb">lb</option>
+        `;
+        primaryLabel.textContent = 'Torque';
+        primaryUnit.textContent = 'N·m';
+        secondaryLabel.textContent = 'Torque / BW';
+        secondaryUnit.textContent = 'N·m/kg';
+      } else {
+        mainLabel.textContent = 'Torque:';
+        mainUnit.innerHTML = `<option value="Nm">N·m</option>`;
+        primaryLabel.textContent = 'Force';
+        primaryUnit.textContent = 'N';
+        secondaryLabel.textContent = 'Force / BW';
+        secondaryUnit.textContent = 'N/kg';
+      }
+      tertiaryLabel.textContent = 'Force / BW';
+      tertiaryUnit.textContent = 'N/kg';
+    }
 
-    if (!bw || !main || !len) {
+    function update() {
+      const bw = parseFloat(bwValue.value);
+      const main = parseFloat(mainValue.value);
+      const len = parseFloat(lengthValue.value);
+
+      if (!bw || !main || !len) {
+        result1.textContent = '0.00';
+        result2.textContent = '0.00';
+        result3.textContent = '0.00';
+        return;
+      }
+
+      const bwKg = toKg(bw, bwUnit.value);
+      const L = toM(len, lengthUnit.value);
+
+      let forceN, torqueNm;
+
+      if (mode.value === 'forceToTorque') {
+        forceN = toN(main, mainUnit.value);
+        torqueNm = forceN * L;
+      } else {
+        torqueNm = main;
+        forceN = torqueNm / L;
+      }
+
+      const torqueNorm = torqueNm / bwKg; // N·m/kg
+      const forceNorm  = forceN / bwKg;   // N/kg
+
+      result1.textContent = (mode.value === 'forceToTorque'
+        ? torqueNm
+        : forceN).toFixed(2);
+
+      result2.textContent = (mode.value === 'forceToTorque'
+        ? torqueNorm
+        : forceNorm).toFixed(2);
+
+      result3.textContent = forceNorm.toFixed(2);
+    }
+
+    submitBtn.addEventListener('click', update);
+
+    resetBtn.addEventListener('click', () => {
+      bwValue.value = '';
+      mainValue.value = '';
+      lengthValue.value = '';
       result1.textContent = '0.00';
       result2.textContent = '0.00';
-      return;
-    }
+      result3.textContent = '0.00';
+    });
 
-    const bwKg = toKg(bw, bwUnit.value);
-    const L = toM(len, lengthUnit.value);
+    mode.addEventListener('change', () => {
+      updateUI();
+      update();
+    });
 
-    let value, norm;
+    document.querySelectorAll('input, select').forEach(el => {
+      if (el !== mode) {
+        el.addEventListener('input', update);
+        el.addEventListener('change', update);
+      }
+    });
 
-    if (mode.value === 'forceToTorque') {
-      const F = toN(main, mainUnit.value);
-      value = F * L;
-      norm = value / bwKg;
-    } else {
-      value = main / L;
-      norm = value / bwKg;
-    }
-
-    result1.textContent = value.toFixed(2);
-    result2.textContent = norm.toFixed(2);
-  }
-
-  submitBtn.addEventListener('click', update);
-
-  resetBtn.addEventListener('click', () => {
-    bwValue.value = '';
-    mainValue.value = '';
-    lengthValue.value = '';
-    result1.textContent = '0.00';
-    result2.textContent = '0.00';
-  });
-
- mode.addEventListener('change', () => {
-  updateUI();
-  update();
-});
-
-document.querySelectorAll('input, select').forEach(el => {
-  if (el !== mode) {
-    el.addEventListener('input', update);
-    el.addEventListener('change', update);
-  }
-});
-
-  updateUI();
-</script>
+    updateUI();
+  </script>
 
 </body>
 </html>
