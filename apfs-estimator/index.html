@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ankle Plantar Flexion Strength Estimator (Empirical Model)</title>
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #e0f7f5; /* light turquoise tint */
+    position: relative;
+  }
+
+  h2 { 
+    text-align: center; 
+    margin-top: 60px; /* push heading down so button doesn't cover */
+  }
+
+  label { font-weight: bold; display: block; margin-top: 12px; }
+  input, select, textarea { width: 100%; padding: 6px; margin-top: 4px; }
+  button { width: 100%; padding: 10px; margin-top: 18px; font-size: 16px; cursor: pointer; border: none; border-radius: 6px; }
+
+  #landingBtn {
+    position: fixed; /* fixed so it stays top-left */
+    top: 20px;
+    left: 20px;
+    width: auto;
+    padding: 8px 14px;
+    background-color: #40e0d0; /* turquoise */
+    color: white;
+    font-weight: bold;
+    z-index: 1000;
+  }
+
+  .results {
+    margin-top: 20px;
+    padding: 14px;
+    background: #f4f6f8;
+    border-radius: 6px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  #formulaDisplay {
+    margin-top: 20px;
+    padding: 14px;
+    background: #d0f0f0; /* slightly darker turquoise tint */
+    border-radius: 6px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #003f3f;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  th, td { border: 1px solid #999; padding: 6px; text-align: center; }
+  th { background: #eee; }
+</style>
+</head>
+<body>
+
+<!-- Landing page button top-left -->
+<button id="landingBtn" onclick="window.location.href='https://jam-moh.github.io/Ankle-Measurement-Calculators/'">Return to Landing Page</button>
+
+<h2>Ankle Plantar Flexion Strength Estimator (Empirical Model)</h2>
+
+<label>Sex (Female = 0, Male = 1)</label>
+<select id="sex">
+  <option value="0">Female</option>
+  <option value="1">Male</option>
+</select>
+
+<label>Age (years)</label>
+<input type="number" id="age" min="5" max="100">
+
+<label>Body Weight</label>
+<input type="number" id="weight">
+<select id="weightUnit">
+  <option value="kg">kg</option>
+  <option value="lb">lb</option>
+</select>
+
+<label>Measured PF Trials (comma-separated, lb or N)</label>
+<textarea id="force" placeholder="e.g., 150, 155, 160"></textarea>
+<select id="forceUnit">
+  <option value="lb">lb</option>
+  <option value="N">N</option>
+</select>
+
+<button onclick="calculateMulti()">Calculate</button>
+
+<div class="results" id="output"></div>
+<div id="formulaDisplay"></div>
+
+<div class="note">
+<b>Notes:</b><br>
+• Children formula (<18 y) uses weight in kg<br>
+• Adult (18–64 y) and older adult (≥65 y) use weight in lb<br>
+• Predicted PF in lb and N; ratios in N/kg
+</div>
+
+<script>
+function calculateMulti() {
+  const sex = Number(document.getElementById("sex").value);
+  const age = Number(document.getElementById("age").value);
+  let weightInput = Number(document.getElementById("weight").value);
+  const weightUnit = document.getElementById("weightUnit").value;
+  const forceInput = document.getElementById("force").value;
+  const forceUnit = document.getElementById("forceUnit").value;
+
+  if (!age || !weightInput || !forceInput.trim()) {
+    document.getElementById("output").innerHTML = "Please complete all fields.";
+    document.getElementById("formulaDisplay").innerHTML = "";
+    return;
+  }
+
+  // -------------------------
+  // Convert weight
+  // -------------------------
+  let weightKg = weightInput;
+  let weightLb = weightInput;
+  if (weightUnit === "lb") weightKg = weightInput * 0.453592;
+  else weightLb = weightInput / 0.453592;
+
+  // -------------------------
+  // Parse measured trials
+  // -------------------------
+  let trials = forceInput.split(',').map(x => Number(x.trim())).filter(x => !isNaN(x));
+  if(trials.length === 0){
+    document.getElementById("output").innerHTML = "Enter valid numeric trials.";
+    document.getElementById("formulaDisplay").innerHTML = "";
+    return;
+  }
+
+  // Convert measured to lb and N
+  let trialsLb = [], trialsN = [];
+  for (let t of trials) {
+    if (forceUnit === "N") {
+      trialsN.push(t);
+      trialsLb.push(t / 4.44822);
+    } else {
+      trialsLb.push(t);
+      trialsN.push(t * 4.44822);
+    }
+  }
+
+  // -------------------------
+  // Predict PF for this subject
+  // -------------------------
+  let predictedLb;
+  let formulaText = "";
+  if (age < 18) {
+    predictedLb = 10 + 2.2 * weightKg + 1.5 * age + 12 * sex;
+    formulaText = "Child Formula: PF (lb) = 10 + 2.2 × Weight(kg) + 1.5 × Age + 12 × Male";
+  } else if (age < 65) {
+    predictedLb = 140 + 0.25 * weightLb - 0.55 * age - 0.003 * age * age + 123 * sex;
+    formulaText = "Adult Formula: PF (lb) = 140 + 0.25 × Weight(lb) - 0.55 × Age - 0.003 × Age² + 123 × Male";
+  } else {
+    predictedLb = 140 + 0.25 * weightLb - 0.55 * age - 0.01 * age * age + 123 * sex;
+    formulaText = "Older Adult Formula: PF (lb) = 140 + 0.25 × Weight(lb) - 0.55 × Age - 0.01 × Age² + 123 × Male";
+  }
+
+  const predictedN = predictedLb * 4.44822;
+  const ratioPredicted = predictedN / weightKg;
+
+  // -------------------------
+  // Compute stats
+  // -------------------------
+  const meanMeasuredN = trialsN.reduce((a,b)=>a+b,0)/trialsN.length;
+  const meanMeasuredLb = trialsLb.reduce((a,b)=>a+b,0)/trialsLb.length;
+  const percentPredicted = (meanMeasuredN / predictedN) * 100;
+  const ratioMeasured = meanMeasuredN / weightKg;
+
+  // -------------------------
+  // Output table
+  // -------------------------
+  let tableHTML = "<table><tr><th>Trial #</th><th>Measured PF (lb)</th><th>Measured PF (N)</th></tr>";
+  trials.forEach((t,i)=>{
+    tableHTML += `<tr><td>${i+1}</td><td>${trialsLb[i].toFixed(1)}</td><td>${trialsN[i].toFixed(1)}</td></tr>`;
+  });
+  tableHTML += "</table>";
+
+  document.getElementById("output").innerHTML = 
+    `<b>Predicted PF:</b> ${predictedLb.toFixed(1)} lb (${predictedN.toFixed(1)} N)<br>
+     <b>Mean Measured PF:</b> ${meanMeasuredLb.toFixed(1)} lb (${meanMeasuredN.toFixed(1)} N)<br>
+     <b>% Predicted:</b> ${percentPredicted.toFixed(1)}%<br>
+     <b>Force-to-Body Weight Ratio (N/kg):</b><br>
+     • Measured: ${ratioMeasured.toFixed(2)}<br>
+     • Predicted: ${ratioPredicted.toFixed(2)}<br><br>
+     <b>Individual Trial Values:</b>${tableHTML}`;
+
+  // -------------------------
+  // Display predictive formula
+  // -------------------------
+  document.getElementById("formulaDisplay").innerHTML = `<b>Applied Predictive Formula:</b><br>${formulaText}`;
+}
+</script>
+</body>
+</html>
