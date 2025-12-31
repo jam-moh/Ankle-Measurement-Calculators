@@ -2,56 +2,111 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Coefficient of Variation</title>
+<title>Coefficient of Variation & Magnitude-Based Progress Estimator</title>
 
 <style>
 :root{
   --bg:#f4f7fb;--card:#fff;--primary:#2563eb;
   --accent:#10b981;--text:#1f2937;--muted:#6b7280
 }
-body{font-family:system-ui;background:linear-gradient(135deg,#f4f7fb,#e8eef7);
-margin:0;padding:30px;color:var(--text)}
-.container{max-width:1100px;margin:auto}
-.card{background:var(--card);border-radius:14px;padding:20px;
-box-shadow:0 10px 30px rgba(0,0,0,.08);margin-bottom:20px}
-textarea{width:100%;height:160px;padding:12px;border-radius:10px;border:1px solid #d1d5db}
-button{padding:10px 16px;border-radius:10px;border:none;cursor:pointer}
+body{
+  font-family:system-ui;
+  background:linear-gradient(135deg,#f4f7fb,#e8eef7);
+  margin:0;
+  padding:30px;
+  color:var(--text)
+}
+.container{
+  max-width:1100px;
+  margin:auto
+}
+.card{
+  background:var(--card);
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  margin-bottom:20px
+}
+textarea{
+  width:100%;
+  height:160px;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #d1d5db
+}
+button{
+  padding:10px 16px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer
+}
 .primary{background:var(--primary);color:white}
 .reset{background:#e5e7eb}
-.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-.box{background:#f9fafb;border-radius:12px;padding:16px;border-left:6px solid var(--accent)}
-.toggle{color:var(--primary);cursor:pointer;font-size:14px}
-.explain{display:none;color:var(--muted);font-size:14px;margin-top:8px}
+.results{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:16px
+}
+.box{
+  background:#f9fafb;
+  border-radius:12px;
+  padding:16px;
+  border-left:6px solid var(--accent)
+}
+.toggle{
+  color:var(--primary);
+  cursor:pointer;
+  font-size:14px
+}
+.explain{
+  display:none;
+  color:var(--muted);
+  font-size:14px;
+  margin-top:8px
+}
 
-  /* 🔹 Back to landing page button */
-    .back-home {
-      align-self: flex-start;
-      margin-bottom: 15px;
-      padding: 6px 12px;
-      background-color: rgba(255,255,255,0.15);
-      color: #00ffd5;
-      text-decoration: none;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
+/* 🔹 Back to landing page button */
+.back-home {
+  align-self: flex-start;
+  margin-bottom: 15px;
+  padding: 6px 12px;
+  background-color: rgba(255,255,255,0.15);
+  color: #00ffd5;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.back-home:hover {
+  background-color: rgba(255,255,255,0.25);
+}
 
-    .back-home:hover {
-      background-color: rgba(255,255,255,0.25);
-    }
+/* 🔹 Narrative block */
+.narrative {
+  background:#eef2ff;
+  padding:16px;
+  border-radius:12px;
+  margin-bottom:20px;
+  font-size:0.95rem;
+  line-height:1.5;
+  border-left:6px solid #2563eb;
+}
 </style>
 </head>
 
 <body>
 
-  <a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/"
-   class="back-home">
-  ← Back to Landing Page
+<a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/" class="back-home">
+← Back to Landing Page
 </a>
-  
+
 <div class="container">
 
-<h1>Coefficient of Variation</h1>
+<h1>Coefficient of Variation & Magnitude-Based Progress Estimator</h1>
+
+<div class="narrative">
+This app calculates the **Coefficient of Variation (CV)** using multiple complementary methods, evaluates **reliability via ICC**, and interprets observed changes using a **magnitude-based framework** (Trivial, Likely, Certain). It is designed for clinicians and coaches to monitor athlete or patient progress, providing immediate feedback on the meaningfulness of observed changes. All calculations are displayed in an intuitive, user-friendly interface with the ability to download results.
+</div>
 
 <div class="card">
 <h3>Paste Data (2 or 3 Trials)</h3>
@@ -106,6 +161,11 @@ function calc(){
  const mdc=sem*1.96*Math.sqrt(2);
  const mdcP=mdc/gm*100;
 
+ // Magnitude-based framework (Trivial, Likely, Certain)
+ const trivial = cv3;
+ const likely = cv3 * 1;
+ const certain = cv3 * 2;
+
  resultsCSV+=
  `CV Method 1,${cv1.toFixed(2)}\nCV Method 2,${cv2.toFixed(2)}\nCV Method 3,${cv3.toFixed(2)}\n`+
  `Reliability,${rel.toFixed(3)}\nSEM,${sem.toFixed(2)}\nMDC,${mdc.toFixed(2)}\nMDC%,${mdcP.toFixed(2)}\n`;
@@ -119,6 +179,14 @@ function calc(){
 
  <div class="box"><h3>Reliability</h3>
  ${k===2?`r=${rel.toFixed(3)}<br>${t}<br>${ba}`:`ICC(3,1)=${rel.toFixed(3)}`}
+ </div>
+
+ <div class="box"><h3>Magnitude-Based Interpretation</h3>
+ Trivial Change: ±${trivial.toFixed(2)}%<br>
+ Likely Change: ±${likely.toFixed(2)}%<br>
+ Certain Change: ±${certain.toFixed(2)}%
+ <div class="toggle" onclick="tog(this)">Explain</div>
+ <div class="explain">Based on within-subject CV, changes are classified as Trivial, Likely, or Certain.</div>
  </div>
 
  <div class="box"><h3>MDC</h3>
@@ -164,5 +232,6 @@ function resetAll(){
  resultsCSV="Metric,Value\n";
 }
 </script>
+
 </body>
 </html>
