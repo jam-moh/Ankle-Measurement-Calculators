@@ -139,7 +139,7 @@ function calc(){
  const cv1=sd(flat)/gm*100;
  const cv2=mean(d.map(r=>sd(r)/mean(r)*100));
 
- let diffs=[];
+ let diffs=[]; 
  if(k===2)d.forEach(r=>diffs.push(r[1]-r[0]));
  else d.forEach(r=>{for(let i=1;i<k;i++)diffs.push(r[i]-r[0])});
 
@@ -231,13 +231,12 @@ function resetAll(){
  document.getElementById("out").innerHTML="";
  resultsCSV="Metric,Value\n";
 }
-</script>
-<script>
+
+// 🔹 Return button logic
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const fromSuite = params.get('from') === 'suite';
 
-  // Only add Return button if none exists
   if (fromSuite && !document.getElementById('returnBtn')) {
     const container = document.createElement('div');
     container.style.display = 'flex';
@@ -254,12 +253,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.style.cursor = 'pointer';
     btn.style.fontWeight = '600';
     btn.style.boxShadow = '0 3px 6px rgba(0,0,0,0.2)';
+    btn.style.backgroundColor = '#22c55e';  
+    btn.style.color = '#ffffff';
 
-    // Button colors: light background, dark text (adjust as needed per app)
-    btn.style.backgroundColor = '#22c55e';  // green shade similar to some app buttons
-    btn.style.color = '#ffffff';           // white text for contrast
-
-    // Click action
     btn.onclick = () => {
       window.location.href = 'https://jam-moh.github.io/ankle-calf-suite-2/';
     };
