@@ -13,19 +13,6 @@ body{
   color:#111;
 }
 
-.back-btn{
-  position:fixed;
-  top:15px;
-  left:15px;
-  background:#1e40af;
-  color:white;
-  padding:8px 14px;
-  border-radius:10px;
-  text-decoration:none;
-  font-weight:600;
-  z-index:10;
-}
-
 .container{max-width:1000px;margin:auto;padding:30px;}
 
 h1{text-align:center;color:#2563eb;}
@@ -95,8 +82,6 @@ th{background:#e5e7eb;}
 </head>
 
 <body>
-
-<a class="back-btn" href="https://jam-moh.github.io/Ankle-Measurement-Calculators/">← Back</a>
 
 <div class="container">
 <h1>Smallest Worthwhile Change (SWC) Calculator</h1>
@@ -271,6 +256,7 @@ function resetApp(){
 
 [baselineEl,followupEl,sdEl,nEl].forEach(el=>el.oninput=updateApp);
 </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
@@ -285,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     container.id = 'navButtonsContainer';
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
-    container.style.gap = '10px';
+    container.style.gap = '16px'; /* increased spacing */
     container.style.position = 'fixed';
     container.style.top = '20px';
     container.style.left = '20px';
@@ -314,19 +300,15 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.onclick = () => { window.location.href = url; };
   }
 
-  // Suite-2 return button
+  // Suite-2 return button (always)
   addButton('returnSuiteBtn', '⬅ Return to Ankle–Calf Suite', 'https://jam-moh.github.io/ankle-calf-suite-2/');
 
   // Landing page return button (only if not from Suite-2)
   if (!fromSuite) {
-    addButton('returnLandingBtn', '← Return to Landing Page', 'https://jam-moh.github.io/Ankle-Measurement-Calculators/', '#2563eb');
+    addButton('returnLandingBtn', '⬅ Return to Landing Page', 'https://jam-moh.github.io/Ankle-Measurement-Calculators/', '#2563eb');
   }
 });
 </script>
-
-</body>
-</html>
-
 
 </body>
 </html>
