@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ankle Torque ⇄ Force Converter</title>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .container {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 540px;
+      width: 100%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+
+    .input-group {
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    label {
+      min-width: 140px;
+    }
+
+    input, select {
+      padding: 6px 10px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: none;
+      width: 120px;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 8px 18px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button.submit {
+      background-color: #00ffd5;
+      color: #003333;
+    }
+
+    button.reset {
+      background-color: #ff6b6b;
+      color: #330000;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    .results {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.2rem;
+    }
+
+    .result-number {
+      font-weight: bold;
+      color: #00ffd5;
+    }
+
+    /* Interpretation / Clinical Impression Box */
+    #comparisonNarrative {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 1.2rem;      /* matches results font size */
+      font-weight: bold;
+      color: #00ffd5;         /* same as submit button for contrast */
+      border: 1.5px solid #00ffd5; /* subtle border */
+      border-radius: 12px;
+      padding: 10px 15px;
+      line-height: 1.4;
+    }
+
+    #comparisonNarrative span.note {
+      font-size: 0.9rem;
+      color: #ccc;
+      font-weight: normal;
+      display: block;
+      margin-top: 5px;
+    }
+
+    .footer {
+      margin-top: auto;
+      font-size: 0.8rem;
+      color: #aaa;
+      text-align: center;
+    }
+
+    /* --- Print Styles --- */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .container {
+        background: white !important;
+        box-shadow: none !important;
+      }
+      .result-number, #comparisonNarrative {
+        color: black !important;
+        border-color: black !important;
+      }
+      button {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🦵 Ankle Torque ⇄ Force Converter</h1>
+
+<div class="container">
+
+  <!-- MODE -->
+  <div class="input-group">
+    <label>Calculation Mode:</label>
+    <select id="mode">
+      <option value="forceToTorque">Force → Torque</option>
+      <option value="torqueToForce">Torque → Force</option>
+    </select>
+  </div>
+
+  <!-- BODY WEIGHT -->
+  <div class="input-group">
+    <label>Body Weight:</label>
+    <input type="number" id="bwValue" step="any" min="0">
+    <select id="bwUnit">
+      <option value="kg">kg</option>
+      <option value="lb">lb</option>
+    </select>
+  </div>
+
+  <!-- MAIN INPUT -->
+  <div class="input-group">
+    <label id="mainLabel">Force:</label>
+    <input type="number" id="mainValue" step="any" min="0">
+    <select id="mainUnit"></select>
+  </div>
+
+  <!-- LENGTH -->
+  <div class="input-group">
+    <label>Moment Arm Length:</label>
+    <input type="number" id="lengthValue" step="any" min="0">
+    <select id="lengthUnit">
+      <option value="m">m</option>
+      <option value="cm">cm</option>
+      <option value="in">in</option>
+    </select>
+  </div>
+
+  <!-- SEX -->
+  <div class="input-group">
+    <label>Sex:</label>
+    <select id="sexSelect">
+      <option value="M">Male</option>
+      <option value="F">Female</option>
+    </select>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="button-group">
+    <button class="submit" id="submitBtn">Submit</button>
+    <button class="reset" id="resetBtn">Reset</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results">
+    <div>
+      <span id="primaryLabel">Torque</span>:
+      <span class="result-number" id="result1">0.00</span>
+      <span id="primaryUnit">N·m</span>
+    </div>
+    <br>
+    <div>
+      <span id="secondaryLabel">Torque / BW</span>:
+      <span class="result-number" id="result2">0.00</span>
+      <span id="secondaryUnit">N·m/kg</span>
+    </div>
+    <div id="result3Container">
+      <span id="tertiaryLabel">Force / BW</span>: 
+      <span class="result-number" id="result3">0.00</span> N/kg
+    </div>
+
+    <!-- Interpretation / Clinical Impression -->
+    <div id="comparisonNarrative">
+      <strong>Interpretation / Clinical Impression:</strong>
+      <div id="narrativeText"></div>
+      <span class="note">*Interpretation based on currently available published data for females/males.</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Built with pure HTML + Vanilla JS · Clinically normalized outputs
+</div>
+
+<script>
+const g = 9.81;
+
+const mode = document.getElementById('mode');
+const bwValue = document.getElementById('bwValue');
+const bwUnit  = document.getElementById('bwUnit');
+const mainValue = document.getElementById('mainValue');
+const mainUnit  = document.getElementById('mainUnit');
+const mainLabel = document.getElementById('mainLabel');
+const lengthValue = document.getElementById('lengthValue');
+const lengthUnit  = document.getElementById('lengthUnit');
+const result1 = document.getElementById('result1');
+const result2 = document.getElementById('result2');
+const result3 = document.getElementById('result3');
+const tertiaryLabel = document.getElementById('tertiaryLabel');
+const primaryLabel   = document.getElementById('primaryLabel');
+const primaryUnit    = document.getElementById('primaryUnit');
+const secondaryLabel = document.getElementById('secondaryLabel');
+const secondaryUnit  = document.getElementById('secondaryUnit');
+const submitBtn = document.getElementById('submitBtn');
+const resetBtn  = document.getElementById('resetBtn');
+const sexSelect = document.getElementById('sexSelect');
+const narrativeTextDiv = document.getElementById('narrativeText');
+
+function toKg(v,u){ return u === 'kg' ? v : v * 0.45359237; }
+function toM(v,u){ return u === 'm' ? v : u === 'cm' ? v / 100 : v * 0.0254; }
+function toN(v,u){
+  if(u === 'N') return v;
+  if(u === 'kg') return v * g;
+  if(u === 'lb') return v * 4.44822;
+  return 0;
+}
+
+function updateUI() {
+  if (mode.value === 'forceToTorque') {
+    mainLabel.textContent = 'Force:';
+    mainUnit.innerHTML = `
+      <option value="N">N</option>
+      <option value="kg">kg</option>
+      <option value="lb">lb</option>
+    `;
+    primaryLabel.textContent = 'Torque';
+    primaryUnit.textContent = 'N·m';
+    secondaryLabel.textContent = 'Torque / BW';
+    secondaryUnit.textContent = 'N·m/kg';
+    tertiaryLabel.textContent = 'Force / BW';
+  } else {
+    mainLabel.textContent = 'Torque:';
+    mainUnit.innerHTML = `<option value="Nm">N·m</option>`;
+    primaryLabel.textContent = 'Force';
+    primaryUnit.textContent = 'N';
+    secondaryLabel.textContent = 'Force / BW';
+    secondaryUnit.textContent = 'N/kg';
+    tertiaryLabel.textContent = 'Torque / BW';
+  }
+}
+
+// --- Published Ratios ---
+const publishedForceRatios = [
+  { study: "Mattiussi et al. 2022", sport: "Mixed", sex: "F", ratio: 14.3 },
+  { study: "Mattiussi et al. 2022", sport: "Mixed", sex: "M", ratio: 16 },
+  { study: "O'Neill et al. 2023", sport: "Mixed", sex: "Mixed", ratio: 18.07 },
+  { study: "Lee et al. 2023", sport: "Rugby", sex: "M", ratio: 18.25 },
+  { study: "Rhodes et al. 2022", sport: "Soccer", sex: "M", ratio: 25.6 }
+];
+
+const publishedTorqueRatios = [
+  { study: "Tippett 1986", sport: "Baseball", sex: "M", ratio: 1.39 },
+  { study: "Buchanan et al. 2009", sport: "Basketball", sex: "F", ratio: 0.9 },
+  { study: "Buchanan et al. 2009", sport: "Basketball", sex: "M", ratio: 1.26 },
+  { study: "Gonosova et al. 2018", sport: "None", sex: "Mixed", ratio: 1.59 },
+  { study: "Moraux et al. 2013", sport: "None", sex: "F", ratio: 1.66 },
+  { study: "Moraux et al. 2013", sport: "None", sex: "M", ratio: 1.75 },
+  { study: "O'Neil et al. 2019", sport: "Running", sex: "M", ratio: 0.95 },
+  { study: "Balasas et al. 2017", sport: "Volleyball", sex: "M", ratio: 1.22 }
+];
+
+// --- Helper to get min/max range ---
+function getRange(dataset) {
+  const values = dataset.map(r => r.ratio);
+  return { min: Math.min(...values), max: Math.max(...values) };
+}
+
+// --- Narrative generator ---
+function generateNarrative(forceBW, torqueBW, sex) {
+  let forceDataset = publishedForceRatios.filter(r => r.sex === sex || r.sex === "Mixed");
+  let forceRange = getRange(forceDataset);
+  let forceNarr = `Force/BW (${forceBW.toFixed(2)} N/kg) is `;
+  if (forceBW < forceRange.min) forceNarr += `below the typical range of ${forceRange.min.toFixed(2)}–${forceRange.max.toFixed(2)} N/kg for ${sex.toLowerCase()}s.`;
+  else if (forceBW > forceRange.max) forceNarr += `above the typical range of ${forceRange.min.toFixed(2)}–${forceRange.max.toFixed(2)} N/kg for ${sex.toLowerCase()}s.`;
+  else forceNarr += `within the typical range of ${forceRange.min.toFixed(2)}–${forceRange.max.toFixed(2)} N/kg for ${sex.toLowerCase()}s.`;
+
+  let torqueDataset = publishedTorqueRatios.filter(r => r.sex === sex || r.sex === "Mixed");
+  let torqueRange = getRange(torqueDataset);
+  let torqueNarr = `Torque/BW (${torqueBW.toFixed(2)} N·m/kg) is `;
+  if (torqueBW < torqueRange.min) torqueNarr += `below the typical range of ${torqueRange.min.toFixed(2)}–${torqueRange.max.toFixed(2)} N·m/kg for ${sex.toLowerCase()}s.`;
+  else if (torqueBW > torqueRange.max) torqueNarr += `above the typical range of ${torqueRange.min.toFixed(2)}–${torqueRange.max.toFixed(2)} N·m/kg for ${sex.toLowerCase()}s.`;
+  else torqueNarr += `within the typical range of ${torqueRange.min.toFixed(2)}–${torqueRange.max.toFixed(2)} N·m/kg for ${sex.toLowerCase()}s.`;
+
+  return `${forceNarr}\n${torqueNarr}`;
+}
+
+// --- Update function ---
+function update() {
+  const bw = parseFloat(bwValue.value);
+  const main = parseFloat(mainValue.value);
+  const len = parseFloat(lengthValue.value);
+
+  if (!bw || !main || !len) {
+    result1.textContent = '0.00';
+    result2.textContent = '0.00';
+    result3.textContent = '0.00';
+    narrativeTextDiv.textContent = '';
+    return;
+  }
+
+  const bwKg = toKg(bw, bwUnit.value);
+  const L = toM(len, lengthUnit.value);
+
+  let torque = 0;
+  let force = 0;
+
+  if (mode.value === 'forceToTorque') {
+    force = toN(main, mainUnit.value);
+    torque = force * L;
+  } else {
+    torque = toN(main, mainUnit.value);
+    force = torque / L;
+  }
+
+  const torqueBW = torque / bwKg;
+  const forceBW = force / bwKg;
+
+  result1.textContent = mode.value === 'forceToTorque' ? torque.toFixed(2) : force.toFixed(2);
+  result2.textContent = mode.value === 'forceToTorque' ? torqueBW.toFixed(2) : forceBW.toFixed(2);
+  result3.textContent = mode.value === 'forceToTorque' ? forceBW.toFixed(2) : torqueBW.toFixed(2);
+
+  const sex = sexSelect.value;
+  narrativeTextDiv.textContent = generateNarrative(forceBW, torqueBW, sex);
+}
+
+// --- Event listeners ---
+submitBtn.addEventListener('click', update);
+resetBtn.addEventListener('click', () => {
+  bwValue.value = '';
+  mainValue.value = '';
+  lengthValue.value = '';
+  result1.textContent = '0.00';
+  result2.textContent = '0.00';
+  result3.textContent = '0.00';
+  narrativeTextDiv.textContent = '';
+});
+
+mode.addEventListener('change', () => {
+  updateUI();
+  update();
+});
+
+document.querySelectorAll('input, select').forEach(el => {
+  if (el !== mode) {
+    el.addEventListener('input', update);
+    el.addEventListener('change', update);
+  }
+});
+
+sexSelect.addEventListener('change', update);
+
+updateUI();
+</script>
+
+</body>
+</html>
