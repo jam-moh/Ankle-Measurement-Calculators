@@ -397,7 +397,31 @@ document.querySelectorAll('input, select').forEach(el => {
 sexSelect.addEventListener('change', update);
 
 updateUI();
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const fromSuite = params.get('from') === 'suite';
+
+  const returnURL = fromSuite
+    ? 'https://jam-moh.github.io/ankle-calf-suite-2/'
+    : 'https://jam-moh.github.io/Ankle-Measurement-Calculators/';
+
+  const returnBtn = document.getElementById('returnBtn');
+  if (returnBtn) {
+    returnBtn.textContent = fromSuite
+      ? '⬅ Return to Ankle–Calf Suite'
+      : '⬅ Back to Calculators Home';
+
+    returnBtn.onclick = () => {
+      window.location.href = returnURL;
+    };
+  }
+});
+
 </script>
+
+  <div class="return-home">
+  <button id="returnBtn">⬅ Return</button>
+</div>
 
 </body>
 </html>
