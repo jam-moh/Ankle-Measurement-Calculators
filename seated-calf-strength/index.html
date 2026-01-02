@@ -19,7 +19,7 @@
         @media (max-width: 600px) {
             .container { width: 90%; padding: 15px; }
 
-    /* 🔹 Navigation buttons (uniform across apps) */
+/* 🔹 Navigation buttons (uniform across apps) */
 .nav-buttons {
   display: flex;
   flex-direction: column;   /* stack vertically */
@@ -27,7 +27,7 @@
   margin-bottom: 20px;
   max-width: 300px;         /* constrain width so not full-page */
   margin-left: 0;           /* keep buttons left-aligned */
-  padding: 0 0;             /* remove side padding so container fits */
+  padding: 0;               /* no extra padding */
 }
 
 .nav-btn {
@@ -38,7 +38,7 @@
   border: none;
   cursor: pointer;
   text-align: left;         /* left-aligned text */
-  width: 100%;              /* fill container, not full page */
+  width: 100%;              /* fill container width */
   background-color: #2563eb;
   color: white;
 }
@@ -56,15 +56,14 @@
 </head>
 <body>
 
- <div class="nav-buttons">
+<div class="nav-buttons">
   <button class="nav-btn"
     onclick="window.location.href='https://jam-moh.github.io/Ankle-Measurement-Calculators/'">
-    ⬅ Return to Landing Page
+    ← Return to Landing Page
   </button>
 
-  <button class="nav-btn secondary"
-    onclick="window.location.href='https://jam-moh.github.io/ankle-calf-suite-2/'">
-    ⬅ Return to Suite-2
+  <button id="suiteBtn" class="nav-btn secondary" style="display:none;">
+    ← Return to Suite-2
   </button>
 </div>
 
@@ -163,7 +162,7 @@
             document.getElementById("observed").value = 0;
             document.getElementById("result").innerHTML = "";
 
-            <script>
+<script>
   // Show Suite-2 button only if coming from suite
   const params = new URLSearchParams(window.location.search);
   if (params.get('from') === 'suite') {
@@ -174,6 +173,7 @@
     };
   }
 </script>
+
     
 </body>
 </html>
