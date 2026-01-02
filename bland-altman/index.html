@@ -48,10 +48,55 @@
     background-color: white;
     margin-top: 20px;
   }
+/* 🔹 Navigation buttons (uniform across apps) */
+.nav-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+  max-width: 300px;
+  margin-left: 0;
+  margin-right: auto;
+  width: fit-content;
+}
+
+.nav-btn {
+  padding: 12px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  background-color: #2563eb;
+  color: white;
+}
+
+.nav-btn.secondary {
+  background-color: #6c757d;
+}
+
+.nav-btn:hover {
+  opacity: 0.9;
+}
+  
 </style>
 </head>
 <body>
 
+<div class="nav-buttons">
+  <button class="nav-btn"
+    onclick="window.location.href='https://jam-moh.github.io/Ankle-Measurement-Calculators/'">
+    ← Return to Landing Page
+  </button>
+
+  <button id="suiteBtn" class="nav-btn secondary" style="display:none;">
+    ← Return to Suite-2
+  </button>
+</div>
+
+  
 <h1>Bland–Altman Plot</h1>
 <p>Paste paired data (Trial 1, Trial 2) separated by comma, tab, or space, one pair per line:</p>
 
@@ -165,6 +210,19 @@ function drawPlot() {
         ctx.stroke();
     });
 }
+</script>
+<script>
+  // Show Suite-2 button only if coming from suite
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('from') === 'suite') {
+    const btn = document.getElementById('suiteBtn');
+    if (btn) {
+      btn.style.display = 'block';
+      btn.onclick = () => {
+        window.location.href = 'https://jam-moh.github.io/ankle-calf-suite-2/';
+      };
+    }
+  }
 </script>
 
 </body>
