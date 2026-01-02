@@ -250,6 +250,69 @@ function analyze(){
 `;
 }
 </script>
+<script>
+function mean(arr){ ... }
+function sd(arr){ ... }
+function analyze(){ ... }
+</script>
+
+<!-- Add this new block AFTER your analyze script -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const fromSuite = params.get('from') === 'suite';
+
+  const body = document.querySelector('body');
+
+  // Container for stacked buttons
+  let container = document.getElementById('navButtonsContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'navButtonsContainer';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '10px';      // Space between buttons
+    container.style.position = 'fixed';
+    container.style.top = '20px';
+    container.style.left = '20px';
+    container.style.zIndex = '999';
+    body.insertBefore(container, body.firstChild);
+  }
+
+  // Helper to create or update a button
+  function addButton(id, text, url, bgColor='#22c55e') {
+    let btn = document.getElementById(id);
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = id;
+      container.appendChild(btn);
+    }
+    btn.textContent = text;
+    btn.style.padding = '10px 18px';
+    btn.style.fontSize = '1rem';
+    btn.style.border = 'none';
+    btn.style.borderRadius = '8px';
+    btn.style.cursor = 'pointer';
+    btn.style.fontWeight = '600';
+    btn.style.backgroundColor = bgColor;
+    btn.style.color = '#fff';
+    btn.style.boxShadow = '0 3px 6px rgba(0,0,0,0.2)';
+    btn.onclick = () => { window.location.href = url; };
+  }
+
+  // Suite-2 return button (if launched from Suite-2)
+  if (fromSuite) {
+    addButton('returnSuiteBtn', '⬅ Return to Ankle–Calf Suite', 'https://jam-moh.github.io/ankle-calf-suite-2/');
+  }
+
+  // Landing page button (always visible)
+  addButton('returnLandingBtn', '← Return to Landing Page', 'https://jam-moh.github.io/Ankle-Measurement-Calculators/', '#2563eb');
+
+  // Remove old <a class="back"> link if present
+  const oldBack = document.querySelector('.back');
+  if(oldBack) oldBack.remove();
+});
+</script>
 
 </body>
 </html>
