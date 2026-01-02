@@ -559,40 +559,54 @@ document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const fromSuite = params.get('from') === 'suite';
 
-  // Only add Return button if launched from Suite-2 AND no existing button
-  if (fromSuite && !document.getElementById('returnBtn')) {
-    const container = document.createElement('div');
-    container.style.display = 'flex';
-    container.style.justifyContent = 'flex-start';
-    container.style.marginBottom = '20px';
+  const body = document.querySelector('body');
 
-    const btn = document.createElement('button');
-    btn.id = 'returnBtn';
-    btn.textContent = '⬅ Return to Ankle–Calf Suite';
+  // Container for stacked buttons
+  let container = document.getElementById('navButtonsContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'navButtonsContainer';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '10px';      // Space between buttons
+    container.style.position = 'fixed';
+    container.style.top = '20px';
+    container.style.left = '20px';
+    container.style.zIndex = '999';
+    body.insertBefore(container, body.firstChild);
+  }
+
+  // Helper to create or update a button
+  function addButton(id, text, url, bgColor='#22c55e') {
+    let btn = document.getElementById(id);
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = id;
+      container.appendChild(btn);
+    }
+    btn.textContent = text;
     btn.style.padding = '10px 18px';
-    btn.style.fontSize = '1.1rem';
+    btn.style.fontSize = '1rem';
     btn.style.border = 'none';
     btn.style.borderRadius = '8px';
     btn.style.cursor = 'pointer';
     btn.style.fontWeight = '600';
+    btn.style.backgroundColor = bgColor;
+    btn.style.color = '#fff';
     btn.style.boxShadow = '0 3px 6px rgba(0,0,0,0.2)';
-    btn.style.backgroundColor = '#22c55e'; // green shade
-    btn.style.color = '#ffffff';           // white text for contrast
-
-    btn.onclick = () => {
-      window.location.href = 'https://jam-moh.github.io/ankle-calf-suite-2/';
-    };
-
-    container.appendChild(btn);
-    const body = document.querySelector('body');
-    if (body.firstChild) {
-      body.insertBefore(container, body.firstChild);
-    } else {
-      body.appendChild(container);
-    }
+    btn.onclick = () => { window.location.href = url; };
   }
+
+  // Suite-2 return button (only if launched from Suite-2)
+  if (fromSuite) {
+    addButton('returnSuiteBtn', '⬅ Return to Ankle–Calf Suite', 'https://jam-moh.github.io/ankle-calf-suite-2/');
+  }
+
+  // Landing page button (always present)
+  addButton('returnLandingBtn', '← Return to Landing Page', 'https://jam-moh.github.io/Ankle-Measurement-Calculators/', '#2563eb');
 });
 </script>
+
 
 </body>
 </html>
