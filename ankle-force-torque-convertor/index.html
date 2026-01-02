@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Ankle Torque ⇄ Force Converter</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -14,6 +14,44 @@
       align-items: center;
       padding: 30px;
       min-height: 100vh;
+      text-align: center; /* keeps content centered except nav-buttons */
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .nav-buttons {
+      display: flex;
+      flex-direction: column;   /* stack vertically */
+      gap: 10px;                /* space between buttons */
+      max-width: 300px;
+      margin-left: 0;
+      margin-right: auto;       /* left align container */
+      width: fit-content;       /* shrink container to fit buttons */
+      text-align: left;         /* left-align text inside buttons */
+    }
+
+    .nav-btn {
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      text-align: left;         /* button text left-aligned */
+      width: 100%;
+      background-color: #2563eb;
+      color: white;
+    }
+
+    .nav-btn.secondary {
+      background-color: #6c757d;
+    }
+
+    .nav-btn:hover {
+      opacity: 0.9;
     }
 
     h1 {
@@ -37,9 +75,7 @@
       gap: 10px;
     }
 
-    label {
-      min-width: 140px;
-    }
+    label { min-width: 140px; }
 
     input, select {
       padding: 6px 10px;
@@ -56,15 +92,6 @@
       margin-top: 20px;
     }
 
-    button {
-      padding: 8px 18px;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
     button.submit {
       background-color: #00ffd5;
       color: #003333;
@@ -75,9 +102,7 @@
       color: #330000;
     }
 
-    button:hover {
-      opacity: 0.85;
-    }
+    button:hover { opacity: 0.85; }
 
     .results {
       margin-top: 20px;
@@ -85,12 +110,8 @@
       font-size: 1.2rem;
     }
 
-    .result-number {
-      font-weight: bold;
-      color: #00ffd5;
-    }
+    .result-number { font-weight: bold; color: #00ffd5; }
 
-    /* Interpretation / Clinical Impression Box */
     #comparisonNarrative {
       margin-top: 15px;
       text-align: center;
@@ -111,37 +132,6 @@
       margin-top: 5px;
     }
 
-    .nav-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-      max-width: 300px;
-      width: fit-content;
-      margin-left: 0;
-    }
-
-    .nav-btn {
-      padding: 12px 18px;
-      font-size: 1rem;
-      font-weight: 600;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      text-align: left;
-      width: 100%;
-      background-color: #2563eb;
-      color: white;
-    }
-
-    .nav-btn.secondary {
-      background-color: #6c757d;
-    }
-
-    .nav-btn:hover {
-      opacity: 0.9;
-    }
-
     .footer {
       margin-top: auto;
       font-size: 0.8rem;
@@ -150,320 +140,243 @@
     }
 
     @media print {
-      body {
-        background: white !important;
-        color: black !important;
-      }
-      .container {
-        background: white !important;
-        box-shadow: none !important;
-      }
-      .result-number, #comparisonNarrative {
-        color: black !important;
-        border-color: black !important;
-      }
-      button {
-        display: none;
-      }
+      body { background: white !important; color: black !important; }
+      .container { background: white !important; box-shadow: none !important; }
+      .result-number, #comparisonNarrative { color: black !important; border-color: black !important; }
+      button { display: none; }
     }
-<style>
-/* Navigation buttons - stacked left, not full width */
-.nav-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 300px;
-  margin-left: 0;
-  margin-right: auto;  /* prevents full-width ribbon */
-  width: fit-content;  /* shrink to fit buttons */
-}
-.nav-btn {
-  padding: 12px 18px;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  text-align: left;   /* left-align text */
-  width: 100%;
-}
-.nav-btn.secondary {
-  background-color: #6c757d;
-}
-.nav-btn:hover { opacity: 0.9; }
-</style>
-
-    
   </style>
 </head>
-
 <body>
 
-<h1>🦵 Ankle Torque ⇄ Force Converter</h1>
+  <!-- Navigation buttons -->
+  <div class="nav-buttons">
+    <button class="nav-btn"
+      onclick="window.location.href='https://jam-moh.github.io/Ankle-Measurement-Calculators/'">
+      ← Return to Landing Page
+    </button>
 
-<!-- Navigation Buttons -->
-<div class="nav-buttons">
-  <button class="nav-btn" onclick="window.location.href='https://jam-moh.github.io/Ankle-Measurement-Calculators/'">
-    ← Return to Landing Page
-  </button>
-  <button id="suiteBtn" class="nav-btn secondary" style="display:none;">
-    ← Return to Suite-2
-  </button>
-</div>
-
-<div class="container">
-
-  <!-- MODE -->
-  <div class="input-group">
-    <label>Calculation Mode:</label>
-    <select id="mode">
-      <option value="forceToTorque">Force → Torque</option>
-      <option value="torqueToForce">Torque → Force</option>
-    </select>
+    <button id="suiteBtn" class="nav-btn secondary" style="display:none;">
+      ← Return to Suite-2
+    </button>
   </div>
 
-  <!-- BODY WEIGHT -->
-  <div class="input-group">
-    <label>Body Weight:</label>
-    <input type="number" id="bwValue" step="any" min="0">
-    <select id="bwUnit">
-      <option value="kg">kg</option>
-      <option value="lb">lb</option>
-    </select>
-  </div>
+  <h1>🦵 Ankle Torque ⇄ Force Converter</h1>
 
-  <!-- MAIN INPUT -->
-  <div class="input-group">
-    <label id="mainLabel">Force:</label>
-    <input type="number" id="mainValue" step="any" min="0">
-    <select id="mainUnit"></select>
-  </div>
+  <div class="container">
 
-  <!-- LENGTH -->
-  <div class="input-group">
-    <label>Moment Arm Length:</label>
-    <input type="number" id="lengthValue" step="any" min="0">
-    <select id="lengthUnit">
-      <option value="m">m</option>
-      <option value="cm">cm</option>
-      <option value="in">in</option>
-    </select>
-  </div>
-
-  <!-- SEX -->
-  <div class="input-group">
-    <label>Sex:</label>
-    <select id="sexSelect">
-      <option value="M">Male</option>
-      <option value="F">Female</option>
-    </select>
-  </div>
-
-  <!-- BUTTONS -->
-  <div class="button-group">
-    <button class="submit" id="submitBtn">Submit</button>
-    <button class="reset" id="resetBtn">Reset</button>
-  </div>
-
-  <!-- RESULTS -->
-  <div class="results">
-    <div>
-      <span id="primaryLabel">Torque</span>:
-      <span class="result-number" id="result1">0.00</span>
-      <span id="primaryUnit">N·m</span>
-    </div>
-    <br>
-    <div>
-      <span id="secondaryLabel">Torque / BW</span>:
-      <span class="result-number" id="result2">0.00</span>
-      <span id="secondaryUnit">N·m/kg</span>
-    </div>
-    <div id="result3Container">
-      <span id="tertiaryLabel">Force / BW</span>: 
-      <span class="result-number" id="result3">0.00</span> N/kg
+    <div class="input-group">
+      <label>Calculation Mode:</label>
+      <select id="mode">
+        <option value="forceToTorque">Force → Torque</option>
+        <option value="torqueToForce">Torque → Force</option>
+      </select>
     </div>
 
-    <div id="comparisonNarrative">
-      <strong>Interpretation / Clinical Impression:</strong>
-      <div id="narrativeText"></div>
-      <span class="note">*Interpretation based on currently available published data for females/males.</span>
+    <div class="input-group">
+      <label>Body Weight:</label>
+      <input type="number" id="bwValue" step="any" min="0">
+      <select id="bwUnit">
+        <option value="kg">kg</option>
+        <option value="lb">lb</option>
+      </select>
     </div>
+
+    <div class="input-group">
+      <label id="mainLabel">Force:</label>
+      <input type="number" id="mainValue" step="any" min="0">
+      <select id="mainUnit"></select>
+    </div>
+
+    <div class="input-group">
+      <label>Moment Arm Length:</label>
+      <input type="number" id="lengthValue" step="any" min="0">
+      <select id="lengthUnit">
+        <option value="m">m</option>
+        <option value="cm">cm</option>
+        <option value="in">in</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Sex:</label>
+      <select id="sexSelect">
+        <option value="M">Male</option>
+        <option value="F">Female</option>
+      </select>
+    </div>
+
+    <div class="button-group">
+      <button class="submit" id="submitBtn">Submit</button>
+      <button class="reset" id="resetBtn">Reset</button>
+    </div>
+
+    <div class="results">
+      <div>
+        <span id="primaryLabel">Torque</span>:
+        <span class="result-number" id="result1">0.00</span>
+        <span id="primaryUnit">N·m</span>
+      </div>
+      <br>
+      <div>
+        <span id="secondaryLabel">Torque / BW</span>:
+        <span class="result-number" id="result2">0.00</span>
+        <span id="secondaryUnit">N·m/kg</span>
+      </div>
+      <div id="result3Container">
+        <span id="tertiaryLabel">Force / BW</span>:
+        <span class="result-number" id="result3">0.00</span> N/kg
+      </div>
+
+      <div id="comparisonNarrative">
+        <strong>Interpretation / Clinical Impression:</strong>
+        <div id="narrativeText"></div>
+        <span class="note">*Interpretation based on currently available published data for females/males.</span>
+      </div>
+    </div>
+
   </div>
 
-</div>
+  <div class="footer">
+    Built with pure HTML + Vanilla JS · Clinically normalized outputs
+  </div>
 
-<div class="footer">
-  Built with pure HTML + Vanilla JS · Clinically normalized outputs
-</div>
+  <script>
+    const g = 9.81;
+    const mode = document.getElementById('mode');
+    const bwValue = document.getElementById('bwValue');
+    const bwUnit  = document.getElementById('bwUnit');
+    const mainValue = document.getElementById('mainValue');
+    const mainUnit  = document.getElementById('mainUnit');
+    const mainLabel = document.getElementById('mainLabel');
+    const lengthValue = document.getElementById('lengthValue');
+    const lengthUnit  = document.getElementById('lengthUnit');
+    const result1 = document.getElementById('result1');
+    const result2 = document.getElementById('result2');
+    const result3 = document.getElementById('result3');
+    const tertiaryLabel = document.getElementById('tertiaryLabel');
+    const primaryLabel   = document.getElementById('primaryLabel');
+    const primaryUnit    = document.getElementById('primaryUnit');
+    const secondaryLabel = document.getElementById('secondaryLabel');
+    const secondaryUnit  = document.getElementById('secondaryUnit');
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn  = document.getElementById('resetBtn');
+    const sexSelect = document.getElementById('sexSelect');
+    const narrativeTextDiv = document.getElementById('narrativeText');
+    const suiteBtn = document.getElementById('suiteBtn');
 
-<script>
-const g = 9.81;
+    function toKg(v,u){ return u==='kg'?v:v*0.45359237; }
+    function toM(v,u){ return u==='m'?v:u==='cm'?v/100:v*0.0254; }
+    function toN(v,u){ if(u==='N')return v;if(u==='kg')return v*g;if(u==='lb')return v*4.44822;return 0; }
 
-const mode = document.getElementById('mode');
-const bwValue = document.getElementById('bwValue');
-const bwUnit  = document.getElementById('bwUnit');
-const mainValue = document.getElementById('mainValue');
-const mainUnit  = document.getElementById('mainUnit');
-const mainLabel = document.getElementById('mainLabel');
-const lengthValue = document.getElementById('lengthValue');
-const lengthUnit  = document.getElementById('lengthUnit');
-const result1 = document.getElementById('result1');
-const result2 = document.getElementById('result2');
-const result3 = document.getElementById('result3');
-const tertiaryLabel = document.getElementById('tertiaryLabel');
-const primaryLabel   = document.getElementById('primaryLabel');
-const primaryUnit    = document.getElementById('primaryUnit');
-const secondaryLabel = document.getElementById('secondaryLabel');
-const secondaryUnit  = document.getElementById('secondaryUnit');
-const submitBtn = document.getElementById('submitBtn');
-const resetBtn  = document.getElementById('resetBtn');
-const sexSelect = document.getElementById('sexSelect');
-const narrativeTextDiv = document.getElementById('narrativeText');
+    function updateUI() {
+      if(mode.value==='forceToTorque'){
+        mainLabel.textContent='Force:';
+        mainUnit.innerHTML='<option value="N">N</option><option value="kg">kg</option><option value="lb">lb</option>';
+        primaryLabel.textContent='Torque'; primaryUnit.textContent='N·m';
+        secondaryLabel.textContent='Torque / BW'; secondaryUnit.textContent='N·m/kg';
+        tertiaryLabel.textContent='Force / BW';
+      } else {
+        mainLabel.textContent='Torque:'; mainUnit.innerHTML='<option value="Nm">N·m</option>';
+        primaryLabel.textContent='Force'; primaryUnit.textContent='N';
+        secondaryLabel.textContent='Force / BW'; secondaryUnit.textContent='N/kg';
+        tertiaryLabel.textContent='Torque / BW';
+      }
+    }
 
-function toKg(v,u){ return u === 'kg' ? v : v * 0.45359237; }
-function toM(v,u){ return u === 'm' ? v : u === 'cm' ? v / 100 : v * 0.0254; }
-function toN(v,u){
-  if(u === 'N') return v;
-  if(u === 'kg') return v * g;
-  if(u === 'lb') return v * 4.44822;
-  return 0;
-}
+    // --- Published Ratios ---
+    const publishedForceRatios = [
+      { study: "Mattiussi et al. 2022", sport: "Mixed", sex: "F", ratio: 14.3 },
+      { study: "Mattiussi et al. 2022", sport: "Mixed", sex: "M", ratio: 16 },
+      { study: "O'Neill et al. 2023", sport: "Mixed", sex: "Mixed", ratio: 18.07 },
+      { study: "Lee et al. 2023", sport: "Rugby", sex: "M", ratio: 18.25 },
+      { study: "Rhodes et al. 2022", sport: "Soccer", sex: "M", ratio: 25.6 }
+    ];
 
-function updateUI() {
-  if (mode.value === 'forceToTorque') {
-    mainLabel.textContent = 'Force:';
-    mainUnit.innerHTML = `
-      <option value="N">N</option>
-      <option value="kg">kg</option>
-      <option value="lb">lb</option>
-    `;
-    primaryLabel.textContent = 'Torque';
-    primaryUnit.textContent = 'N·m';
-    secondaryLabel.textContent = 'Torque / BW';
-    secondaryUnit.textContent = 'N·m/kg';
-    tertiaryLabel.textContent = 'Force / BW';
-  } else {
-    mainLabel.textContent = 'Torque:';
-    mainUnit.innerHTML = `<option value="Nm">N·m</option>`;
-    primaryLabel.textContent = 'Force';
-    primaryUnit.textContent = 'N';
-    secondaryLabel.textContent = 'Force / BW';
-    secondaryUnit.textContent = 'N/kg';
-    tertiaryLabel.textContent = 'Torque / BW';
-  }
-}
+    const publishedTorqueRatios = [
+      { study: "Tippett 1986", sport: "Baseball", sex: "M", ratio: 1.39 },
+      { study: "Buchanan et al. 2009", sport: "Basketball", sex: "F", ratio: 0.9 },
+      { study: "Buchanan et al. 2009", sport: "Basketball", sex: "M", ratio: 1.26 },
+      { study: "Gonosova et al. 2018", sport: "None", sex: "Mixed", ratio: 1.59 },
+      { study: "Moraux et al. 2013", sport: "None", sex: "F", ratio: 1.66 },
+      { study: "Moraux et al. 2013", sport: "None", sex: "M", ratio: 1.75 },
+      { study: "O'Neil et al. 2019", sport: "Running", sex: "M", ratio: 0.95 },
+      { study: "Balasas et al. 2017", sport: "Volleyball", sex: "M", ratio: 1.22 }
+    ];
 
-// --- Published Ratios ---
-const publishedForceRatios = [
-  { study: "Mattiussi et al. 2022", sport: "Mixed", sex: "F", ratio: 14.3 },
-  { study: "Mattiussi et al. 2022", sport: "Mixed", sex: "M", ratio: 16 },
-  { study: "O'Neill et al. 2023", sport: "Mixed", sex: "Mixed", ratio: 18.07 },
-  { study: "Lee et al. 2023", sport: "Rugby", sex: "M", ratio: 18.25 },
-  { study: "Rhodes et al. 2022", sport: "Soccer", sex: "M", ratio: 25.6 }
-];
+    function getRange(dataset){ const values=dataset.map(r=>r.ratio); return {min:Math.min(...values),max:Math.max(...values)}; }
 
-const publishedTorqueRatios = [
-  { study: "Tippett 1986", sport: "Baseball", sex: "M", ratio: 1.39 },
-  { study: "Buchanan et al. 2009", sport: "Basketball", sex: "F", ratio: 0.9 },
-  { study: "Buchanan et al. 2009", sport: "Basketball", sex: "M", ratio: 1.26 },
-  { study: "Gonosova et al. 2018", sport: "None", sex: "Mixed", ratio: 1.59 },
-  { study: "Moraux et al. 2013", sport: "None", sex: "F", ratio: 1.66 },
-  { study: "Moraux et al. 2013", sport: "None", sex: "M", ratio: 1.75 },
-  { study: "O'Neil et al. 2019", sport: "Running", sex: "M", ratio: 0.95 },
-  { study: "Balasas et al. 2017", sport: "Volleyball", sex: "M", ratio: 1.22 }
-];
+    function generateNarrative(forceBW, torqueBW, sex){
+      let forceDataset=publishedForceRatios.filter(r=>r.sex===sex||r.sex==='Mixed');
+      let forceRange=getRange(forceDataset);
+      let forceNarr=`Force/BW (${forceBW.toFixed(2)} N/kg) is `;
+      if(forceBW<forceRange.min) forceNarr+=`below the typical range of ${forceRange.min.toFixed(2)}–${forceRange.max.toFixed(2)} N/kg for ${sex.toLowerCase()}s.`;
+      else if(forceBW>forceRange.max) forceNarr+=`above the typical range of ${forceRange.min.toFixed(2)}–${forceRange.max.toFixed(2)} N/kg for ${sex.toLowerCase()}s.`;
+      else forceNarr+=`within the typical range of ${forceRange.min.toFixed(2)}–${forceRange.max.toFixed(2)} N/kg for ${sex.toLowerCase()}s.`;
 
-function getRange(dataset) {
-  const values = dataset.map(r => r.ratio);
-  return { min: Math.min(...values), max: Math.max(...values) };
-}
+      let torqueDataset=publishedTorqueRatios.filter(r=>r.sex===sex||r.sex==='Mixed');
+      let torqueRange=getRange(torqueDataset);
+      let torqueNarr=`Torque/BW (${torqueBW.toFixed(2)} N·m/kg) is `;
+      if(torqueBW<torqueRange.min) torqueNarr+=`below the typical range of ${torqueRange.min.toFixed(2)}–${torqueRange.max.toFixed(2)} N·m/kg for ${sex.toLowerCase()}s.`;
+      else if(torqueBW>torqueRange.max) torqueNarr+=`above the typical range of ${torqueRange.min.toFixed(2)}–${torqueRange.max.toFixed(2)} N·m/kg for ${sex.toLowerCase()}s.`;
+      else torqueNarr+=`within the typical range of ${torqueRange.min.toFixed(2)}–${torqueRange.max.toFixed(2)} N·m/kg for ${sex.toLowerCase()}s.`;
 
-function generateNarrative(forceBW, torqueBW, sex) {
-  let forceDataset = publishedForceRatios.filter(r => r.sex === sex || r.sex === "Mixed");
-  let forceRange = getRange(forceDataset);
-  let forceNarr = `Force/BW (${forceBW.toFixed(2)} N/kg) is `;
-  if (forceBW < forceRange.min) forceNarr += `below the typical range of ${forceRange.min.toFixed(2)}–${forceRange.max.toFixed(2)} N/kg for ${sex.toLowerCase()}s.`;
-  else if (forceBW > forceRange.max) forceNarr += `above the typical range of ${forceRange.min.toFixed(2)}–${forceRange.max.toFixed(2)} N/kg for ${sex.toLowerCase()}s.`;
-  else forceNarr += `within the typical range of ${forceRange.min.toFixed(2)}–${forceRange.max.toFixed(2)} N/kg for ${sex.toLowerCase()}s.`;
+      return `${forceNarr}\n${torqueNarr}`;
+    }
 
-  let torqueDataset = publishedTorqueRatios.filter(r => r.sex === sex || r.sex === "Mixed");
-  let torqueRange = getRange(torqueDataset);
-  let torqueNarr = `Torque/BW (${torqueBW.toFixed(2)} N·m/kg) is `;
-  if (torqueBW < torqueRange.min) torqueNarr += `below the typical range of ${torqueRange.min.toFixed(2)}–${torqueRange.max.toFixed(2)} N·m/kg for ${sex.toLowerCase()}s.`;
-  else if (torqueBW > torqueRange.max) torqueNarr += `above the typical range of ${torqueRange.min.toFixed(2)}–${torqueRange.max.toFixed(2)} N·m/kg for ${sex.toLowerCase()}s.`;
-  else torqueNarr += `within the typical range of ${torqueRange.min.toFixed(2)}–${torqueRange.max.toFixed(2)} N·m/kg for ${sex.toLowerCase()}s.`;
+    function update(){
+      const bw=parseFloat(bwValue.value);
+      const main=parseFloat(mainValue.value);
+      const len=parseFloat(lengthValue.value);
 
-  return `${forceNarr}\n${torqueNarr}`;
-}
+      if(!bw||!main||!len){
+        result1.textContent='0.00';
+        result2.textContent='0.00';
+        result3.textContent='0.00';
+        narrativeTextDiv.textContent='';
+        return;
+      }
 
-function update() {
-  const bw = parseFloat(bwValue.value);
-  const main = parseFloat(mainValue.value);
-  const len = parseFloat(lengthValue.value);
+      const bwKg=toKg(bw,bwUnit.value);
+      const L=toM(len,lengthUnit.value);
 
-  if (!bw || !main || !len) {
-    result1.textContent = '0.00';
-    result2.textContent = '0.00';
-    result3.textContent = '0.00';
-    narrativeTextDiv.textContent = '';
-    return;
-  }
+      let torque=0; let force=0;
 
-  const bwKg = toKg(bw, bwUnit.value);
-  const L = toM(len, lengthUnit.value);
+      if(mode.value==='forceToTorque'){
+        force=toN(main,mainUnit.value);
+        torque=force*L;
+      } else {
+        torque=toN(main,mainUnit.value);
+        force=torque/L;
+      }
 
-  let torque = 0;
-  let force = 0;
+      const torqueBW=torque/bwKg;
+      const forceBW=force/bwKg;
 
-  if (mode.value === 'forceToTorque') {
-    force = toN(main, mainUnit.value);
-    torque = force * L;
-  } else {
-    torque = toN(main, mainUnit.value);
-    force = torque / L;
-  }
+      result1.textContent=mode.value==='forceToTorque'?torque.toFixed(2):force.toFixed(2);
+      result2.textContent=mode.value==='forceToTorque'?torqueBW.toFixed(2):forceBW.toFixed(2);
+      result3.textContent=mode.value==='forceToTorque'?forceBW.toFixed(2):torqueBW.toFixed(2);
 
-  const torqueBW = torque / bwKg;
-  const forceBW = force / bwKg;
+      const sex=sexSelect.value;
+      narrativeTextDiv.textContent=generateNarrative(forceBW,torqueBW,sex);
+    }
 
-  result1.textContent = mode.value === 'forceToTorque' ? torque.toFixed(2) : force.toFixed(2);
-  result2.textContent = mode.value === 'forceToTorque' ? torqueBW.toFixed(2) : forceBW.toFixed(2);
-  result3.textContent = mode.value === 'forceToTorque' ? forceBW.toFixed(2) : torqueBW.toFixed(2);
+    submitBtn.addEventListener('click',update);
+    resetBtn.addEventListener('click',()=>{ bwValue.value=''; mainValue.value=''; lengthValue.value=''; result1.textContent='0.00'; result2.textContent='0.00'; result3.textContent='0.00'; narrativeTextDiv.textContent=''; });
+    mode.addEventListener('change',()=>{updateUI(); update();});
+    document.querySelectorAll('input, select').forEach(el=>{ if(el!==mode){ el.addEventListener('input',update); el.addEventListener('change',update); }});
+    sexSelect.addEventListener('change',update);
+    updateUI();
 
-  const sex = sexSelect.value;
-  narrativeTextDiv.textContent = generateNarrative(forceBW, torqueBW, sex);
-}
-
-submitBtn.addEventListener('click', update);
-resetBtn.addEventListener('click', () => {
-  bwValue.value = '';
-  mainValue.value = '';
-  lengthValue.value = '';
-  result1.textContent = '0.00';
-  result2.textContent = '0.00';
-  result3.textContent = '0.00';
-  narrativeTextDiv.textContent = '';
-});
-
-mode.addEventListener('change', () => { updateUI(); update(); });
-document.querySelectorAll('input, select').forEach(el => {
-  if (el !== mode) { el.addEventListener('input', update); el.addEventListener('change', update); }
-});
-sexSelect.addEventListener('change', update);
-updateUI();
-
-// --- Navigation buttons: show Suite-2 if launched from Suite-2 ---
-const suiteBtn = document.getElementById('suiteBtn');
-if (suiteBtn) {
-  const referrer = document.referrer;
-  if (referrer.includes('ankle-calf-suite-2')) {
-    suiteBtn.style.display = 'block';
-    suiteBtn.onclick = () => {
-      window.location.href = 'https://jam-moh.github.io/ankle-calf-suite-2/';
-    };
-  }
-}
-</script>
+    // --- Show Suite-2 button if coming from suite
+    document.addEventListener('DOMContentLoaded',()=>{
+      const params=new URLSearchParams(window.location.search);
+      if(params.get('from')==='suite' && suiteBtn){
+        suiteBtn.style.display='block';
+        suiteBtn.onclick=()=>{ window.location.href='https://jam-moh.github.io/ankle-calf-suite-2/'; };
+      }
+    });
+  </script>
 
 </body>
 </html>
