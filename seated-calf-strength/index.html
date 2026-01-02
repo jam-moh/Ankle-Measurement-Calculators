@@ -19,16 +19,15 @@
         @media (max-width: 600px) {
             .container { width: 90%; padding: 15px; }
 
-            /* 🔹 Navigation buttons (uniform across apps) */
+    /* 🔹 Navigation buttons (uniform across apps) */
 .nav-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: column;   /* stack vertically */
+  gap: 10px;                /* space between buttons */
   margin-bottom: 20px;
-  max-width: none;
-  margin-left: 0;
-  margin-right: 0;
-  padding: 0 20px;  
+  max-width: 300px;         /* constrain width so not full-page */
+  margin-left: 0;           /* keep buttons left-aligned */
+  padding: 0 0;             /* remove side padding so container fits */
 }
 
 .nav-btn {
@@ -38,7 +37,8 @@
   border-radius: 8px;
   border: none;
   cursor: pointer;
-  text-align: left;
+  text-align: left;         /* left-aligned text */
+  width: 100%;              /* fill container, not full page */
   background-color: #2563eb;
   color: white;
 }
@@ -50,6 +50,7 @@
 .nav-btn:hover {
   opacity: 0.9;
 }
+
 </style>
 
 </head>
