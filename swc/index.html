@@ -271,52 +271,55 @@ function resetApp(){
 
 [baselineEl,followupEl,sdEl,nEl].forEach(el=>el.oninput=updateApp);
 </script>
-<!-- Your other scripts above -->
-<script src="some-existing-script.js"></script>
-
-<!-- Add Return-to-Suite-2 button script here -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const fromSuite = params.get('from') === 'suite';
-  if (!fromSuite) return;
 
-  if (document.getElementById('returnBtn')) return;
+  const body = document.querySelector('body');
 
-  const container = document.createElement('div');
-  container.style.display = 'flex';
-  container.style.flexDirection = 'column';
-  container.style.gap = '10px';
-  container.style.marginBottom = '20px';
+  // Create container for buttons (stacked vertically)
+  let container = document.getElementById('navButtonsContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'navButtonsContainer';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '10px';
+    container.style.position = 'fixed';
+    container.style.top = '20px';
+    container.style.left = '20px';
+    container.style.zIndex = '999';
+    body.appendChild(container);
+  }
 
-  const btn = document.createElement('button');
-  btn.id = 'returnBtn';
-  btn.textContent = '⬅ Return to Ankle–Calf Suite';
-  btn.style.padding = '10px 18px';
-  btn.style.fontSize = '1.1rem';
-  btn.style.border = 'none';
-  btn.style.borderRadius = '8px';
-  btn.style.cursor = 'pointer';
-  btn.style.fontWeight = '600';
-  btn.style.boxShadow = '0 3px 6px rgba(0,0,0,0.2)';
-  btn.style.backgroundColor = '#22c55e';
-  btn.style.color = '#ffffff';
-  btn.onclick = () => {
-    window.location.href = 'https://jam-moh.github.io/ankle-calf-suite-2/';
-  };
-
-  container.appendChild(btn);
-
-  const existingTopButton = document.querySelector('.back-home');
-  const body = document.body;
-  if (existingTopButton) {
-    existingTopButton.parentNode.insertBefore(container, existingTopButton.nextSibling);
-  } else {
-    if (body.firstChild) {
-      body.insertBefore(container, body.firstChild);
-    } else {
-      body.appendChild(container);
+  // Helper to create or update a button
+  function addButton(id, text, url, bgColor='#22c55e') {
+    let btn = document.getElementById(id);
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = id;
+      container.appendChild(btn);
     }
+    btn.textContent = text;
+    btn.style.padding = '10px 18px';
+    btn.style.fontSize = '1rem';
+    btn.style.border = 'none';
+    btn.style.borderRadius = '8px';
+    btn.style.cursor = 'pointer';
+    btn.style.fontWeight = '600';
+    btn.style.backgroundColor = bgColor;
+    btn.style.color = '#fff';
+    btn.style.boxShadow = '0 3px 6px rgba(0,0,0,0.2)';
+    btn.onclick = () => { window.location.href = url; };
+  }
+
+  // Suite-2 return button
+  addButton('returnSuiteBtn', '⬅ Return to Ankle–Calf Suite', 'https://jam-moh.github.io/ankle-calf-suite-2/');
+
+  // Landing page return button (only if not from Suite-2)
+  if (!fromSuite) {
+    addButton('returnLandingBtn', '← Return to Landing Page', 'https://jam-moh.github.io/Ankle-Measurement-Calculators/', '#2563eb');
   }
 });
 </script>
