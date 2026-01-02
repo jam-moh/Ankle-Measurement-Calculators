@@ -94,10 +94,10 @@
     #comparisonNarrative {
       margin-top: 15px;
       text-align: center;
-      font-size: 1.2rem;      /* matches results font size */
+      font-size: 1.2rem;
       font-weight: bold;
-      color: #00ffd5;         /* same as submit button for contrast */
-      border: 1.5px solid #00ffd5; /* subtle border */
+      color: #00ffd5;
+      border: 1.5px solid #00ffd5;
       border-radius: 12px;
       padding: 10px 15px;
       line-height: 1.4;
@@ -111,6 +111,37 @@
       margin-top: 5px;
     }
 
+    .nav-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+      max-width: 300px;
+      width: fit-content;
+      margin-left: 0;
+    }
+
+    .nav-btn {
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      background-color: #2563eb;
+      color: white;
+    }
+
+    .nav-btn.secondary {
+      background-color: #6c757d;
+    }
+
+    .nav-btn:hover {
+      opacity: 0.9;
+    }
+
     .footer {
       margin-top: auto;
       font-size: 0.8rem;
@@ -118,7 +149,6 @@
       text-align: center;
     }
 
-    /* --- Print Styles --- */
     @media print {
       body {
         background: white !important;
@@ -136,56 +166,22 @@
         display: none;
       }
     }
-
-/* 🔹 Navigation buttons (uniform across apps) */
-.nav-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-  max-width: 300px;
-  margin-left: 0;
-  margin-right: auto;
-  width: fit-content;
-}
-
-.nav-btn {
-  padding: 12px 18px;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-  width: 100%;
-  background-color: #2563eb;
-  color: white;
-}
-
-.nav-btn.secondary {
-  background-color: #6c757d;
-}
-
-.nav-btn:hover {
-  opacity: 0.9;
-}
-    
   </style>
 </head>
 
 <body>
+
+<h1>🦵 Ankle Torque ⇄ Force Converter</h1>
+
+<!-- Navigation Buttons -->
 <div class="nav-buttons">
-  <button class="nav-btn"
-    onclick="window.location.href='https://jam-moh.github.io/Ankle-Measurement-Calculators/'">
+  <button class="nav-btn" onclick="window.location.href='https://jam-moh.github.io/Ankle-Measurement-Calculators/'">
     ← Return to Landing Page
   </button>
-
   <button id="suiteBtn" class="nav-btn secondary" style="display:none;">
     ← Return to Suite-2
   </button>
 </div>
-
-<h1>🦵 Ankle Torque ⇄ Force Converter</h1>
 
 <div class="container">
 
@@ -259,7 +255,6 @@
       <span class="result-number" id="result3">0.00</span> N/kg
     </div>
 
-    <!-- Interpretation / Clinical Impression -->
     <div id="comparisonNarrative">
       <strong>Interpretation / Clinical Impression:</strong>
       <div id="narrativeText"></div>
@@ -350,13 +345,11 @@ const publishedTorqueRatios = [
   { study: "Balasas et al. 2017", sport: "Volleyball", sex: "M", ratio: 1.22 }
 ];
 
-// --- Helper to get min/max range ---
 function getRange(dataset) {
   const values = dataset.map(r => r.ratio);
   return { min: Math.min(...values), max: Math.max(...values) };
 }
 
-// --- Narrative generator ---
 function generateNarrative(forceBW, torqueBW, sex) {
   let forceDataset = publishedForceRatios.filter(r => r.sex === sex || r.sex === "Mixed");
   let forceRange = getRange(forceDataset);
@@ -375,7 +368,6 @@ function generateNarrative(forceBW, torqueBW, sex) {
   return `${forceNarr}\n${torqueNarr}`;
 }
 
-// --- Update function ---
 function update() {
   const bw = parseFloat(bwValue.value);
   const main = parseFloat(mainValue.value);
@@ -414,7 +406,6 @@ function update() {
   narrativeTextDiv.textContent = generateNarrative(forceBW, torqueBW, sex);
 }
 
-// --- Event listeners ---
 submitBtn.addEventListener('click', update);
 resetBtn.addEventListener('click', () => {
   bwValue.value = '';
@@ -426,34 +417,24 @@ resetBtn.addEventListener('click', () => {
   narrativeTextDiv.textContent = '';
 });
 
-mode.addEventListener('change', () => {
-  updateUI();
-  update();
-});
-
+mode.addEventListener('change', () => { updateUI(); update(); });
 document.querySelectorAll('input, select').forEach(el => {
-  if (el !== mode) {
-    el.addEventListener('input', update);
-    el.addEventListener('change', update);
-  }
+  if (el !== mode) { el.addEventListener('input', update); el.addEventListener('change', update); }
 });
-
 sexSelect.addEventListener('change', update);
-
 updateUI();
 
-<script>
-  // Show Suite-2 button only if coming from suite
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('from') === 'suite') {
-    const btn = document.getElementById('suiteBtn');
-    if (btn) {
-      btn.style.display = 'block';
-      btn.onclick = () => {
-        window.location.href = 'https://jam-moh.github.io/ankle-calf-suite-2/';
-      };
-    }
+// --- Navigation buttons: show Suite-2 if launched from Suite-2 ---
+const suiteBtn = document.getElementById('suiteBtn');
+if (suiteBtn) {
+  const referrer = document.referrer;
+  if (referrer.includes('ankle-calf-suite-2')) {
+    suiteBtn.style.display = 'block';
+    suiteBtn.onclick = () => {
+      window.location.href = 'https://jam-moh.github.io/ankle-calf-suite-2/';
+    };
   }
+}
 </script>
 
 </body>
