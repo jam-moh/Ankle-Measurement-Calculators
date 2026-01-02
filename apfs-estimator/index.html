@@ -206,5 +206,52 @@ function calculateMulti() {
 <br>Older Adults (≥65 yrs): PF (lb) = 140 + 0.25 × Weight (lb) - 0.55 × Age - 0.01 × Age² + 123 × Male
 <br>Male = 1, Female = 0. Weight is entered in kg for children and lb for adults/older adults. Outputs include percent of predicted and force-to-body weight ratio (N/kg). Predictions are approximations and provide age-stratified clinical benchmarks.
 </small>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const fromSuite = params.get('from') === 'suite';
+
+  const body = document.querySelector('body');
+
+  // Container for stacked buttons
+  let container = document.createElement('div');
+  container.id = 'navButtonsContainer';
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  container.style.gap = '10px';
+  container.style.position = 'fixed';
+  container.style.top = '20px';
+  container.style.left = '20px';
+  container.style.zIndex = '999';
+  body.insertBefore(container, body.firstChild);
+
+  // Helper to create a button
+  function addButton(id, text, url, bgColor='#22c55e') {
+    const btn = document.createElement('button');
+    btn.id = id;
+    btn.textContent = text;
+    btn.style.padding = '10px 18px';
+    btn.style.fontSize = '1rem';
+    btn.style.border = 'none';
+    btn.style.borderRadius = '8px';
+    btn.style.cursor = 'pointer';
+    btn.style.fontWeight = '600';
+    btn.style.backgroundColor = bgColor;
+    btn.style.color = '#fff';
+    btn.style.boxShadow = '0 3px 6px rgba(0,0,0,0.2)';
+    btn.onclick = () => { window.location.href = url; };
+    container.appendChild(btn);
+  }
+
+  // Suite-2 return button (conditional)
+  if (fromSuite) {
+    addButton('returnSuiteBtn', '⬅ Return to Ankle–Calf Suite', 'https://jam-moh.github.io/ankle-calf-suite-2/');
+  }
+
+  // Always show Landing Page button
+  addButton('returnLandingBtn', '← Return to Landing Page', 'https://jam-moh.github.io/Ankle-Measurement-Calculators/', '#2563eb');
+});
+</script>
+
 </body>
 </html>
