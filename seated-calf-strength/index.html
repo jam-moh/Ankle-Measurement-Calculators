@@ -1,32 +1,77 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Seated Calf Strength Estimator (PeakForce HHD Model)</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
-        h1 { text-align: center; font-size: 1.6em; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
-        label { display: block; margin-top: 10px; font-weight: bold; }
-        input, select, button { width: 100%; padding: 10px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { background-color: #007BFF; color: white; font-weight: bold; border: none; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
-        .result { margin-top: 20px; padding: 15px; background-color: #e9ecef; border-radius: 4px; }
-        .green { color: green; font-weight: bold; }
-        .yellow { color: #b58900; font-weight: bold; }
-        .red { color: red; font-weight: bold; }
-        @media (max-width: 600px) {
-            .container { width: 90%; padding: 15px; }
+<meta charset="UTF-8">
+<title>Seated Calf Strength Estimator (PeakForce HHD Model)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-/* 🔹 Navigation buttons (uniform across apps) */
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background-color: #f5f5f5;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.6em;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #007BFF;
+  color: white;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.result {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+}
+
+.green { color: green; font-weight: bold; }
+.yellow { color: #b58900; font-weight: bold; }
+.red { color: red; font-weight: bold; }
+
+/* 🔹 Navigation buttons (FINAL, UNIFORM) */
 .nav-buttons {
   display: flex;
-  flex-direction: column;   /* stack vertically */
-  gap: 10px;                /* space between buttons */
-  margin: 0 0 20px 20px;    /* top 0, right auto, bottom 20px, left 20px */
-  max-width: 300px;         /* constrain width of button container */
-  width: fit-content;       /* shrink container to fit buttons */
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+  max-width: 300px;
+  width: fit-content;
 }
 
 .nav-btn {
@@ -36,8 +81,7 @@
   border-radius: 8px;
   border: none;
   cursor: pointer;
-  text-align: left;         /* left-align text */
-  width: 100%;              /* buttons same width as container */
+  text-align: left;
   background-color: #2563eb;
   color: white;
 }
@@ -50,15 +94,15 @@
   opacity: 0.9;
 }
 
-.nav-buttons {
-  max-width: 300px;      /* keeps buttons from being too wide */
-  margin-left: 0;         /* left-aligns buttons */
-  margin-right: auto;     /* prevents full-width ribbon on Landing Page */
-  width: fit-content;     /* shrink container to fit buttons */
+@media (max-width: 600px) {
+  .container {
+    width: 90%;
+    padding: 15px;
+  }
 }
 </style>
-
 </head>
+
 <body>
 
 <div class="nav-buttons">
@@ -72,114 +116,98 @@
   </button>
 </div>
 
+<div class="container">
+<h1>Seated Calf Strength Estimator (PeakForce HHD Model)</h1>
 
+<label for="age">Age (years):</label>
+<input type="number" id="age" value="50">
+
+<label for="weight">Weight (lbs):</label>
+<input type="number" id="weight" value="155">
+
+<label for="gender">Gender:</label>
+<select id="gender">
+  <option value="female">Female</option>
+  <option value="male">Male</option>
+</select>
+
+<label for="side">Ankle Side:</label>
+<select id="side">
+  <option value="left">Left</option>
+  <option value="right">Right</option>
+</select>
+
+<label for="observed">Observed PeakForce (optional, lbs):</label>
+<input type="number" id="observed" value="0">
+
+<button onclick="calculateStrength()">Calculate</button>
+<button onclick="resetForm()" style="background-color:#6c757d;margin-top:10px;">Reset</button>
+
+<div class="result" id="result"></div>
 </div>
 
-    <div class="container">
-        <h1>Seated Calf Strength Estimator (PeakForce HHD Model)</h1>
-
-        <label for="age">Age (years):</label>
-        <input type="number" id="age" value="50">
-
-        <label for="weight">Weight (lbs):</label>
-        <input type="number" id="weight" value="155">
-
-        <label for="gender">Gender:</label>
-        <select id="gender">
-            <option value="female">Female</option>
-            <option value="male">Male</option>
-        </select>
-
-        <label for="side">Ankle Side:</label>
-        <select id="side">
-            <option value="left">Left</option>
-            <option value="right">Right</option>
-        </select>
-
-        <label for="observed">Observed PeakForce (optional, lbs):</label>
-        <input type="number" id="observed" value="0">
-
-        <button onclick="calculateStrength()">Calculate</button>
-        <button onclick="resetForm()" style="background-color:#6c757d; margin-top:10px;">Reset</button>
-
-        <div class="result" id="result"></div>
-    </div>
-
-    <script>
-        function calculateStrength() {
-            // Fixed coefficients from LMM
-            const INTERCEPT = 96.200;
-            const AGE_COEF = -1.029;
-            const AGE_SQ_COEF = -0.02;
-            const WEIGHT_COEF = 1.349;
-            const SIDE_LEFT = -6.74;
-            const SIDE_RIGHT = 0;
-            const GENDER_FEMALE = -27.401;
-            const GENDER_MALE = 0;
-            const SD_FEMALE = 40;
-            const SD_MALE = 51;
-
-            // Inputs
-            const age = parseFloat(document.getElementById("age").value);
-            const weight = parseFloat(document.getElementById("weight").value);
-            const gender = document.getElementById("gender").value;
-            const side = document.getElementById("side").value;
-            const observed = parseFloat(document.getElementById("observed").value);
-
-            // Calculations
-            const age_c = age - 42.32;
-            const age_c_sq = age_c * age_c;
-            const side_effect = (side === "left") ? SIDE_LEFT : SIDE_RIGHT;
-            const gender_effect = (gender === "female") ? GENDER_FEMALE : GENDER_MALE;
-            const predicted = INTERCEPT + AGE_COEF*age_c + AGE_SQ_COEF*age_c_sq + WEIGHT_COEF*weight + side_effect + gender_effect;
-
-            let output = `<strong>Predicted PeakForce:</strong> ${predicted.toFixed(2)} lbs<br>`;
-
-            if (observed > 0) {
-                const residual = observed - predicted;
-                const sd = (gender === "female") ? SD_FEMALE : SD_MALE;
-                const z = residual / sd;
-                const ratio = observed / predicted * 100;
-
-                let colorClass = "green";
-                if (Math.abs(z) > 2) colorClass = "red";
-                else if (Math.abs(z) > 1) colorClass = "yellow";
-
-                output += `<strong>Residual (Observed - Predicted):</strong> ${residual.toFixed(2)} lbs<br>`;
-                output += `<strong>Z-score:</strong> <span class="${colorClass}">${z.toFixed(2)}</span><br>`;
-                output += `<strong>Observed / Predicted (%):</strong> ${ratio.toFixed(1)}%<br>`;
-
-                // Interpretation
-                let interpretation = "";
-                if (Math.abs(z) <= 1) interpretation = "Your strength is within the typical range for your gender and age.";
-                else if (Math.abs(z) <= 2) interpretation = "Your strength is slightly outside the typical range.";
-                else interpretation = "Your strength is unusually different from the typical range. This could reflect individual variation or measurement factors.";
-                output += `<strong>Interpretation:</strong> ${interpretation}`;
-            }
-
-            document.getElementById("result").innerHTML = output;
-        }
-
-        function resetForm() {
-            document.getElementById("age").value = 50;
-            document.getElementById("weight").value = 155;
-            document.getElementById("gender").value = "female";
-            document.getElementById("side").value = "left";
-            document.getElementById("observed").value = 0;
-            document.getElementById("result").innerHTML = "";
-
 <script>
-  // Show Suite-2 button only if coming from suite
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('from') === 'suite') {
-    const btn = document.getElementById('suiteBtn');
-    btn.style.display = 'block';
-    btn.onclick = () => {
-      window.location.href = 'https://jam-moh.github.io/ankle-calf-suite-2/';
-    };
+function calculateStrength() {
+  const INTERCEPT = 96.200;
+  const AGE_COEF = -1.029;
+  const AGE_SQ_COEF = -0.02;
+  const WEIGHT_COEF = 1.349;
+  const SIDE_LEFT = -6.74;
+  const GENDER_FEMALE = -27.401;
+  const SD_FEMALE = 40;
+  const SD_MALE = 51;
+
+  const age = +ageInput.value;
+  const weight = +weightInput.value;
+  const gender = genderInput.value;
+  const side = sideInput.value;
+  const observed = +observedInput.value;
+
+  const age_c = age - 42.32;
+  const predicted =
+    INTERCEPT +
+    AGE_COEF * age_c +
+    AGE_SQ_COEF * age_c * age_c +
+    WEIGHT_COEF * weight +
+    (side === "left" ? SIDE_LEFT : 0) +
+    (gender === "female" ? GENDER_FEMALE : 0);
+
+  let output = `<strong>Predicted PeakForce:</strong> ${predicted.toFixed(2)} lbs<br>`;
+
+  if (observed > 0) {
+    const sd = gender === "female" ? SD_FEMALE : SD_MALE;
+    const z = (observed - predicted) / sd;
+    const ratio = observed / predicted * 100;
+
+    const color = Math.abs(z) > 2 ? "red" : Math.abs(z) > 1 ? "yellow" : "green";
+
+    output += `
+      <strong>Z-score:</strong> <span class="${color}">${z.toFixed(2)}</span><br>
+      <strong>Observed / Predicted:</strong> ${ratio.toFixed(1)}%
+    `;
   }
+
+  result.innerHTML = output;
+}
+
+function resetForm() {
+  age.value = 50;
+  weight.value = 155;
+  gender.value = "female";
+  side.value = "left";
+  observed.value = 0;
+  result.innerHTML = "";
+}
+
+/* 🔹 Show Suite-2 button only when coming from suite */
+const params = new URLSearchParams(window.location.search);
+if (params.get("from") === "suite") {
+  const btn = document.getElementById("suiteBtn");
+  btn.style.display = "block";
+  btn.onclick = () =>
+    window.location.href = "https://jam-moh.github.io/ankle-calf-suite-2/";
+}
 </script>
 
-    
 </body>
 </html>
