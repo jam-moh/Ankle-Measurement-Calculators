@@ -271,6 +271,45 @@ function resetApp(){
 
 [baselineEl,followupEl,sdEl,nEl].forEach(el=>el.oninput=updateApp);
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const fromSuite = params.get('from') === 'suite';
+
+  // Only add Return button if launched from Suite-2 AND no existing button
+  if (fromSuite && !document.getElementById('returnBtn')) {
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.justifyContent = 'flex-start';
+    container.style.marginBottom = '20px';
+
+    const btn = document.createElement('button');
+    btn.id = 'returnBtn';
+    btn.textContent = '⬅ Return to Ankle–Calf Suite';
+    btn.style.padding = '10px 18px';
+    btn.style.fontSize = '1.1rem';
+    btn.style.border = 'none';
+    btn.style.borderRadius = '8px';
+    btn.style.cursor = 'pointer';
+    btn.style.fontWeight = '600';
+    btn.style.boxShadow = '0 3px 6px rgba(0,0,0,0.2)';
+    btn.style.backgroundColor = '#22c55e'; // green shade
+    btn.style.color = '#ffffff';           // white text for contrast
+
+    btn.onclick = () => {
+      window.location.href = 'https://jam-moh.github.io/ankle-calf-suite-2/';
+    };
+
+    container.appendChild(btn);
+    const body = document.querySelector('body');
+    if (body.firstChild) {
+      body.insertBefore(container, body.firstChild);
+    } else {
+      body.appendChild(container);
+    }
+  }
+});
+</script>
 
 </body>
 </html>
