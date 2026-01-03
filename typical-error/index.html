@@ -183,6 +183,11 @@ input, select {
     </select>
   </div>
 </div>
+<div class="section-wrapper">
+  <button id="resetBtn">
+    🔄 Reset
+  </button>
+</div>
 
 <!-- ✅ Paste area -->
 <div class="section-wrapper">
@@ -392,42 +397,116 @@ function getDiffsForBA(pair){
   return {diffs, means, meanBias, sdDiff};
 }
 
-// Generate Bland-Altman plot
 function generateBlandAltman(){
+  // Clear canvas
   ctx.clearRect(0,0,baCanvas.width,baCanvas.height);
+
   const pair = baPair.value;
   const {diffs, means, meanBias, sdDiff} = getDiffsForBA(pair);
-  if(diffs.length<2) return;
-  const loaUpper = meanBias+1.96*sdDiff;
-  const loaLower = meanBias-1.96*sdDiff;
+  if(diffs.length < 2) return;
 
-  const margin=50, w=baCanvas.width-margin*2, h=baCanvas.height-margin*2;
-  const xMin=Math.min(...means), xMax=Math.max(...means);
-  const yMin=Math.min(...diffs.concat([loaLower])), yMax=Math.max(...diffs.concat([loaUpper]));
+  const loaUpper = meanBias + 1.96 * sdDiff;
+  const loaLower = meanBias - 1.96 * sdDiff;
 
-  function mapX(x){return margin+((x-xMin)/(xMax-xMin))*w;}
-  function mapY(y){return baCanvas.height-margin-((y-yMin)/(yMax-yMin))*h;}
+  // --- Canvas layout ---
+  const marginLeft = 70;   // extra space for Y axis caption and numbers
+  const marginRight = 100; // extra space for line labels
+  const marginTop = 40;
+  const marginBottom = 50;
 
-  // Points
-  ctx.fillStyle='#00ffd5';
+  const plotWidth = baCanvas.width - marginLeft - marginRight;
+  const plotHeight = baCanvas.height - marginTop - marginBottom;
+
+  const xMin = Math.min(...means);
+  const xMax = Math.max(...means);
+  const yMin = Math.min(...diffs.concat([loaLower]));
+  const yMax = Math.max(...diffs.concat([loaUpper]));
+
+  // Mapping functions
+  function mapX(x){ return marginLeft + ((x - xMin)/(xMax - xMin))*plotWidth; }
+  function mapY(y){ return baCanvas.height - marginBottom - ((y - yMin)/(yMax - yMin))*plotHeight; }
+
+  // --- Background and axes ---
+  ctx.strokeStyle = '#888';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  // Y axis
+  ctx.moveTo(marginLeft, marginTop);
+  ctx.lineTo(marginLeft, baCanvas.height - marginBottom);
+  // X axis
+  ctx.moveTo(marginLeft, baCanvas.height - marginBottom);
+  ctx.lineTo(baCanvas.width - marginRight, baCanvas.height - marginBottom);
+  ctx.stroke();
+
+  // --- Y axis caption ---
+  ctx.save();
+  ctx.fillStyle = '#00e6d6'; // match output values
+  ctx.font = '14px monospace';
+  ctx.textAlign = 'center';
+  ctx.translate(15, baCanvas.height/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText('Difference (TrialB - TrialA)', 0,0);
+  ctx.restore();
+
+  // --- X axis caption ---
+  ctx.fillStyle = '#00e6d6';
+  ctx.textAlign = 'center';
+  ctx.fillText('Mean of Trials', marginLeft + plotWidth/2, baCanvas.height - 15);
+
+  // --- Axis ticks and numbers ---
+  ctx.fillStyle = '#00e6d6';
+  ctx.textAlign = 'right';
+  ctx.font = '12px monospace';
+  const yTicks = 5;
+  for(let i=0;i<=yTicks;i++){
+    const yVal = yMin + i*(yMax - yMin)/yTicks;
+    const yPos = mapY(yVal);
+    ctx.fillText(yVal.toFixed(1), marginLeft - 5, yPos + 4);
+    ctx.beginPath();
+    ctx.moveTo(marginLeft-3, yPos);
+    ctx.lineTo(marginLeft, yPos);
+    ctx.stroke();
+  }
+
+  ctx.textAlign = 'center';
+  const xTicks = Math.min(means.length, 5);
+  for(let i=0;i<=xTicks;i++){
+    const xVal = xMin + i*(xMax - xMin)/xTicks;
+    const xPos = mapX(xVal);
+    ctx.fillText(xVal.toFixed(1), xPos, baCanvas.height - marginBottom + 15);
+    ctx.beginPath();
+    ctx.moveTo(xPos, baCanvas.height - marginBottom);
+    ctx.lineTo(xPos, baCanvas.height - marginBottom + 5);
+    ctx.stroke();
+  }
+
+  // --- Plot points ---
+  ctx.fillStyle = '#00ffd5';
   diffs.forEach((d,i)=>{
     ctx.beginPath();
-    ctx.arc(mapX(means[i]), mapY(d),4,0,2*Math.PI);
+    ctx.arc(mapX(means[i]), mapY(d), 4, 0, 2*Math.PI);
     ctx.fill();
   });
 
-  // Lines
-  function drawLine(yValue,color,label){
-    ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.moveTo(margin,mapY(yValue)); ctx.lineTo(baCanvas.width-margin,mapY(yValue)); ctx.stroke();
-    ctx.fillText(label, baCanvas.width-margin-80,mapY(yValue)-5);
-  }
-  ctx.font='14px monospace';
-  drawLine(meanBias,'yellow','Mean Bias: '+meanBias.toFixed(2));
-  drawLine(loaUpper,'red','LoA+: '+loaUpper.toFixed(2));
-  drawLine(loaLower,'red','LoA-: '+loaLower.toFixed(2));
-}
+  // --- Lines and labels ---
+  function drawLineWithLabel(yValue, color, label){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(marginLeft, mapY(yValue));
+    ctx.lineTo(marginLeft + plotWidth, mapY(yValue));
+    ctx.stroke();
 
+    ctx.fillStyle = color;
+    ctx.textAlign = 'left';
+    ctx.font = '13px monospace';
+    ctx.fillText(label, marginLeft + plotWidth + 5, mapY(yValue) + 4);
+  }
+
+  drawLineWithLabel(meanBias, 'yellow', 'Mean Bias: ' + meanBias.toFixed(1));
+  drawLineWithLabel(loaUpper, 'red', 'LoA+: ' + loaUpper.toFixed(1));
+  drawLineWithLabel(loaLower, 'red', 'LoA-: ' + loaLower.toFixed(1));
+}
 // Main update results function
 function updateResults(){
   const nSubjects = document.querySelectorAll('.t1').length;
@@ -488,12 +567,25 @@ function updateResults(){
     relType.textContent='r:';
   }
 
-  const sem = sd*Math.sqrt(1-reliability);
-  const mdc = 1.96*sem*Math.sqrt(2);
-  const meanRaw = rawScores.reduce((a,b)=>a+b,0)/rawScores.length;
-  const sdRaw = calculateSD(rawScores);
-  const cv = meanRaw>0 ? (sdRaw/meanRaw*100) : 0;
-  const swc = 0.2*sdRaw;
+// --- Minimal Patch for SEM, MDC95, CV, SWC ---
+let sem, mdc, cv, swc;
+
+const sdRaw = calculateSD(rawScores);
+const meanRaw = rawScores.reduce((a,b)=>a+b,0)/rawScores.length;
+
+if(mode3){
+  // --- 3 trials: use ICC-based SEM & MDC95 ---
+  sem = sdRaw * Math.sqrt(1 - reliability);     // SEM = SD * sqrt(1 - ICC)
+  mdc = 1.96 * sem * Math.sqrt(2);             // MDC95
+} else {
+  // --- 2 trials: use TE method ---
+  sem = sd / Math.sqrt(2);                     // TE = SD_diff / sqrt(2)
+  mdc = 1.96 * sem * Math.sqrt(2);
+}
+
+// CV & SWC
+cv  = meanRaw>0 ? (sdRaw / meanRaw * 100) : 0;
+swc = 0.2 * sdRaw;
 
   const meanBias = biasSum/biasCount;
   const loaLower = meanBias-1.96*sd;
@@ -591,6 +683,65 @@ document.addEventListener('DOMContentLoaded', () => {
       body.appendChild(container);
     }
   }
+});
+</script>
+<!-- ✅ Button Section -->
+<div class="back-home-wrapper">
+  <a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/" 
+     class="back-home">
+    ← Return to Landing Page
+  </a>
+  <button id="resetBtn" class="back-home" style="margin-left: 10px; background-color:#ff4d4d; color:white;">
+    🔄 Reset
+  </button>
+</div>
+
+<style>
+/* Landing page button styling — blue background, white text */
+.back-home {
+  background-color: #1d4ed8; /* blue */
+  color: #ffffff;             /* white text */
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.back-home:hover {
+  background-color: #2563eb; /* slightly lighter blue on hover */
+}
+
+/* Reset button styling overrides */
+#resetBtn {
+  background-color: #ff4d4d;
+  color: #fff;
+}
+#resetBtn:hover {
+  background-color: #ff6666;
+}
+</style>
+
+<script>
+// Reset button functionality
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  // Clear all input fields
+  document.querySelectorAll('input[type="number"]').forEach(input => input.value='');
+  // Clear paste area
+  document.getElementById('pasteData').value='';
+  // Clear table diff cells
+  document.querySelectorAll('[id^="d21-"], [id^="d32-"]').forEach(td=>td.textContent='–');
+  // Reset results
+  ['sdValue','teValue','semValue','mdcValue','cvValue','swcValue','biasValue','loaValue','relValue'].forEach(id=>{
+    document.getElementById(id).textContent = id==='loaValue'?'–':'0.00';
+  });
+  itemizedInterp.textContent='–';
+  overallSummary.textContent='–';
+  shortParagraph.textContent='–';
+  // Clear chart
+  ctx.clearRect(0,0,baCanvas.width,baCanvas.height);
 });
 </script>
 
