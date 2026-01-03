@@ -92,11 +92,17 @@ th{background:#e5e7eb;}
 </style>
 </head>
 <body>
+<div class="nav-buttons">
+  <button class="nav-btn"
+    onclick="window.location.href='https://jam-moh.github.io/Ankle-Measurement-Calculators/'">
+    ← Return to Landing Page
+  </button>
 
-  <a href="https://jam-moh.github.io/Ankle-Measurement-Calculators/"
-   class="back-home">
-  ← Back to Landing Page
-</a>
+  <button id="suiteBtn" class="nav-btn secondary" style="display:none;">
+    ← Return to Suite-2
+  </button>
+</div>
+
 <div class="container">
 
 <h1>Minimal Detectable Change (MDC₉₅)</h1>
@@ -260,6 +266,18 @@ function box(label,value,cls=""){
   </div>`;
 }
 </script>
-
+<script>
+  // Show Suite-2 button only if coming from suite
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('from') === 'suite') {
+    const btn = document.getElementById('suiteBtn');
+    if (btn) {
+      btn.style.display = 'block';
+      btn.onclick = () => {
+        window.location.href = 'https://jam-moh.github.io/ankle-calf-suite-2/';
+      };
+    }
+  }
+</script>
 </body>
 </html>
