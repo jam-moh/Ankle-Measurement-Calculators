@@ -67,9 +67,54 @@ th,td{
   padding:8px;
 }
 th{background:#e5e7eb;}
+
+/* 🔹 Navigation buttons (uniform across apps) */
+.nav-buttons {
+  display: flex;
+  flex-direction: column;   /* stack vertically */
+  gap: 10px;                /* space between buttons */
+  margin-bottom: 20px;
+  max-width: 300px;         /* constrain width so not full-page */
+  margin-left: 0;           /* align left */
+  width: fit-content;       /* shrink container to fit buttons */
+}
+
+.nav-btn {
+  padding: 12px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;              /* match container width */
+  background-color: #2563eb;
+  color: white;
+}
+
+.nav-btn.secondary {
+  background-color: #6c757d;
+}
+
+.nav-btn:hover {
+  opacity: 0.9;
+}
+  
 </style>
 </head>
 <body>
+
+<div class="nav-buttons">
+  <button class="nav-btn"
+    onclick="window.location.href='https://jam-moh.github.io/Ankle-Measurement-Calculators/'">
+    ⬅ Return to Landing Page
+  </button>
+
+  <button id="suiteBtn" class="nav-btn secondary" style="display:none;">
+    ⬅ Return to Suite-2
+  </button>
+</div>
+  
 <div class="container">
 <h1>Predictive Ankle Torque Calculator</h1>
 
@@ -318,5 +363,20 @@ function resetApp(){
 [ageEl,heightEl,sexEl,measuredEl,unitEl,leverEl,weightEl,weightUnitEl].forEach(el=>el.oninput=draw);
 draw();
 </script>
+<script>
+  // Show Suite-2 button only if coming from suite
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('from') === 'suite') {
+    const btn = document.getElementById('suiteBtn');
+    if (btn) {
+      btn.style.display = 'block';
+      btn.onclick = () => {
+        window.location.href = 'https://jam-moh.github.io/ankle-calf-suite-2/';
+      };
+    }
+  }
+</script>
+
+  
 </body>
 </html>
