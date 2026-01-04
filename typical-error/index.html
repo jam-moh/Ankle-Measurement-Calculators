@@ -223,22 +223,21 @@ input, select {
     🧠 SEM:
     <span class="result-number" id="semValue">0.00</span><br><br>
 
-    🚨 MDC<sub>95</sub>:
+    🚨 MDC95:
     <span class="result-number" id="mdcValue">0.00</span><br><br>
-
-    CV (%):
-    <span class="result-number" id="cvValue">0.00</span><br><br>
 
     🔹 SWC:
     <span class="result-number" id="swcValue">0.00</span><br><br>
 
     Mean Bias:
-    <span class="result-number" id="biasValue">0.00</span><br>
+    <span class="result-number" id="biasValue">0.00</span>
     LoA:
     <span class="result-number" id="loaValue">–</span><br><br>
 
-    📊 Reliability:
-    <span id="relType">ICC:</span> <span class="result-number" id="relValue">0.00</span>
+    📊 Reliability: <span id="relType">r:</span> <span class="result-number" id="relValue">0.00</span> 
+    CV (%): <span class="result-number" id="cvValue">0.00</span><br><br>
+
+    CV (Hopkins %): <span class="result-number" id="cvHopkinsValue">0.00</span><br><br>
   </div>
 </div>
 
@@ -256,7 +255,7 @@ input, select {
     <b>Overall Summary:</b>
     <pre id="overallSummary">–</pre>
 
-    <b>Short Paragraph (Publication-ready):</b>
+    <b>Conclusion/Impression:</b>
     <pre id="shortParagraph">–</pre>
   </div>
 </div>
@@ -267,15 +266,19 @@ input, select {
     <b>Formulas Reference:</b><br>
     Typical Error (TE) = SD of differences ÷ √2<br>
     SEM = SD × √(1 − r)<br>
-    MDC<sub>95</sub> = 1.96 × SEM × √2<br>
-    CV (%) = SD of raw scores ÷ Mean of raw scores × 100<br>
+    MDC95 = 1.96 × SEM × √2<br>
+    CV (%) = SD of raw scores ÷ Grand Mean of all measurements × 100 &nbsp;&nbsp;<i>(reflects overall variability)</i><br>
+    CV (Hopkins %) = TE ÷ Grand Mean of all measurements × 100 &nbsp;&nbsp;<i>(reflects expected trial-to-trial variability)</i><br>
     SWC = 0.2 × SD of baseline scores<br>
     Mean Bias = mean difference (TrialB − TrialA)<br>
-    Limits of Agreement (LoA) = Mean Bias ± 1.96 × SD_diff<br>
+   Limits of Agreement (LoA):<br>
+• Small sample: Mean Bias ± t<sub>0.975, ν</sub> × SD<sub>diff</sub> × √2, where ν = n − 1 (degrees of freedom) and t<sub>0.975, ν</sub> is the 97.5th percentile of the t-distribution.<br>
+• Large sample: Mean Bias ± 1.96 × SD<sub>diff</sub> × √2<br>
     ICC (for 3 trials) = variance_between_subjects / (variance_between_subjects + variance_within_subjects)<br>
     r (for 2 trials) = 1 − (SD_diff² / SD_raw²)
   </div>
 </div>
+
 
 <div class="footer">
   Pure HTML + Vanilla JS · Journal-ready reliability & agreement calculator
@@ -586,6 +589,9 @@ if(mode3){
 // CV & SWC
 cv  = meanRaw>0 ? (sdRaw / meanRaw * 100) : 0;
 swc = 0.2 * sdRaw;
+// Hopkins CV (%) based on Typical Error
+const cvHopkins = meanRaw > 0 ? (te / meanRaw * 100) : 0;
+document.getElementById('cvHopkinsValue').textContent = cvHopkins.toFixed(2);
 
   const meanBias = biasSum/biasCount;
   const loaLower = meanBias-1.96*sd;
@@ -614,13 +620,15 @@ swc = 0.2 * sdRaw;
   const loaUpperText = loaUpper.toFixed(2);
 
 itemizedInterp.innerHTML =
-`1. Typical Error (TE = ${teText}): Represents the expected trial-to-trial variability. A lower TE indicates more consistent measurements.
-2. Standard Error of Measurement (SEM = ${semText}): Reflects the precision of individual scores; smaller SEM indicates more reliable measurement.
-3. Minimal Detectable Change at 95% (MDC95 = ${mdcText}): The smallest change that can be considered beyond measurement error.
-4. Smallest Worthwhile Change (SWC = ${swcText}): The minimal change considered clinically meaningful.
-5. Coefficient of Variation (CV = ${cvText}%): Expresses variability relative to the mean; lower CV suggests better relative consistency.
-6. Mean Bias = ${biasText}, Limits of Agreement = ${loaLowerText} to ${loaUpperText}: Indicates the average difference between trials and the range within which most differences fall.
-7. ${modeText} = ${reliabilityText}: Indicates reliability; values closer to 1 represent excellent repeatability.`.replace(/\n/g, '<br>');
+`1. Typical Error (TE = ${teText}): Represents the expected trial-to-trial variability. A lower TE indicates more consistent measurements.<br>
+2. Standard Error of Measurement (SEM = ${semText}): Reflects the precision of individual scores; smaller SEM indicates more reliable measurement.<br>
+3. Minimal Detectable Change at 95% (MDC95 = ${mdcText}): The smallest change that can be considered beyond measurement error.<br>
+4. Smallest Worthwhile Change (SWC = ${swcText}): The minimal change considered clinically meaningful.<br>
+5. Coefficient of Variation (CV = ${cvText}%): Expresses variability relative to the mean of raw scores; lower CV suggests better relative consistency.<br>
+&nbsp;&nbsp;• Hopkins CV (${cvHopkins.toFixed(2)}%): CV calculated from the Typical Error; reflects the expected relative variability between repeated measurements.<br>
+6. Mean Bias = ${biasText}, Limits of Agreement = ${loaLowerText} to ${loaUpperText}: Indicates the average difference between trials and the range within which most differences fall.<br>
+7. ${modeText} = ${reliabilityText}: Indicates reliability; values closer to 1 represent excellent repeatability.`;
+
 
 overallSummary.innerHTML =
 `The measurement demonstrated ${reliability>=0.75?'high':'moderate'} reliability (${modeText}=${reliabilityText}). Trial-to-trial variability was ${teText}, with an SEM of ${semText}, and an MDC95 of ${mdcText}, suggesting that changes greater than ${mdcText} units can be considered real. The SWC (${swcText}) provides a benchmark for meaningful change. The mean bias between trials was ${biasText} with limits of agreement from ${loaLowerText} to ${loaUpperText}, indicating ${Math.abs(loaUpper-loaLower)>2*te ? 'considerable':'acceptable'} variability across repeated measurements.`.replace(/\n/g, '<br>');
